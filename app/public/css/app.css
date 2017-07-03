@@ -1,0 +1,40 @@
+
+.tab-header {
+  vertical-align: bottom;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #bbb;
+}
+
+.tab-header-column {
+  min-height: 64px;
+}
+
+.tab-header-button {
+    position: absolute;
+    bottom: 10px;
+}
+
+/* Sticky footer
+-------------------------------------------------- */
+
+.footer > .alert {
+  padding: 10px;
+  margin-bottom: 0px;
+}
+
+
+.disabled .panel-title {
+     /*text-decoration: overline;*/
+     color: #aaa;
+}
+
+div.disabled, .disabled button, .disabled .panel-heading, .disabled div {
+    background-color: #ddd;
+    color: #777;
+
+}
+
+.hiddenfornow {
+    position:absolute;
+    visibility:hidden;
+}

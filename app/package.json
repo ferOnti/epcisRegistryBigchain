@@ -1,0 +1,18 @@
+{
+  "name": "secretParty_app",
+  "version": "1.0.0",
+  "description": "A Secret Party Proof of Concept with BigchainDB",
+  "author": "Fernando Ontiveros <feronti@gmail.com>",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js 2>/dev/null"
+  },
+  "dependencies": {
+    "body-parser": "latest",
+    "eris-contracts": "latest",
+    "express": "latest",
+    "mongodb": "latest",
+    "promise": "latest",
+    "rootpath": "latest"
+  }
+}

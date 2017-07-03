@@ -1,0 +1,9 @@
+{
+    "mongodb" : {
+        "url" : "mongodb://13.82.50.105:27017/bigchain"
+    },
+
+    "app" : {
+        "port": 3000
+    }
+}

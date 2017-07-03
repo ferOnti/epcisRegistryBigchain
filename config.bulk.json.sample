@@ -1,0 +1,11 @@
+{
+	"server": "http://13.82.50.105:3000",
+   	"output":  "../stress/supplyChainDemo/output.xml",
+   	"start": 1019,
+   	"sleep": 10,
+
+   	"alice" : {
+   		"publicKey" : "HoBQueJCQYhx64miL8YiLnT4e3LGZ57Yui11M78W3Dbz",
+		"privateKey" : "DWUzHFmospcVtEkYqweZwmVnfpKhyqj5XUuT5tC3j9UK" 
+	}
+}
