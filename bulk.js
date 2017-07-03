@@ -25,11 +25,11 @@ lr.on('line', function (line) {
     lr.pause()
     epcisService.processLine(line)
         //.then(() => {console.log("bulk.js - processline ")} )
-        .then(sleep.msleep( config.sleep))
+        //.then(sleep.msleep( config.sleep))
         .then(() => {
-            console.log("bulk.js - processline - ")
-            sleep.msleep( config.sleep)
-            console.log("bulk.js - processline - end ")
+            //console.log("bulk.js - processline - ")
+            //sleep.msleep( config.sleep)
+            //console.log("bulk.js - processline - end ")
             lr.resume()
         } )
 });

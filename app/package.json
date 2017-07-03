@@ -8,12 +8,16 @@
     "start": "node server.js 2>/dev/null"
   },
   "dependencies": {
+    "bigchaindb-driver": "^0.2.0",
     "body-parser": "latest",
     "eris-contracts": "latest",
     "express": "latest",
+    "line-by-line": "^0.1.5",
     "mongodb": "latest",
     "promise": "latest",
     "rootpath": "latest",
-    "sprintf": "^0.1.5"
+    "sprintf": "^0.1.5",
+    "sync-request": "^4.1.0",
+    "xmljs": "^0.3.2"
   }
 }
