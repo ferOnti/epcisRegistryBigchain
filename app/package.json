@@ -13,6 +13,7 @@
     "express": "latest",
     "mongodb": "latest",
     "promise": "latest",
-    "rootpath": "latest"
+    "rootpath": "latest",
+    "sprintf": "^0.1.5"
   }
 }
