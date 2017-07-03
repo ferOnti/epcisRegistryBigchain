@@ -29,7 +29,7 @@ var getTransaction = function (txid) {
 	let conn = new BigchainDB.Connection(API_PATH)
 
 	return new Promise( (resolve, reject) => {
-		console.log("  getTransaction: " + txid)
+		//console.log("  getTransaction: " + txid)
 		conn.getTransaction(txid)
 			.then( (res) => { resolve(res)} )
 	})
@@ -98,7 +98,7 @@ var updateEpcisAsset = function(epcisAsset, dbAsset, txAsset) {
 	return conn.postTransaction(txSigned)
     	.then(() => conn.pollStatusAndFetchTransaction(txSigned.id))
 	    .then(res => {
-	        console.log('Transaction', txSigned.id, 'accepted')
+	        console.log('Transaction', txSigned.id, 'accepted (update)')
     	})
 }
 
@@ -179,7 +179,7 @@ var processObjectEvent = function (object) {
 
 	console.log(allEpcidPromises.length)
 
-	if (allEpcidPromises.length < 100) {
+	if (allEpcidPromises.length < 50) {
 		return Promise.resolve()
 	}
 
