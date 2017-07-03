@@ -179,7 +179,7 @@ var processObjectEvent = function (object) {
 
 	console.log(allEpcidPromises.length)
 
-	if (allEpcidPromises.length < 50) {
+	if (allEpcidPromises.length < 100) {
 		return Promise.resolve()
 	}
 
