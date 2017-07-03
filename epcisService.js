@@ -12,6 +12,8 @@ alice.publicKey = config.alice.publicKey
 alice.privateKey = config.alice.privateKey
 //console.log(alice)
 
+var allEpcidPromises = []
+
 var getEpcisAsset = function (epcid) {
 	let conn = new BigchainDB.Connection(API_PATH)
 
@@ -171,15 +173,25 @@ var processObjectEvent = function (object) {
 			//bizLocation: object.bizLocation[0]
 
 		//wait until all promises are completed	
-		epcidPromises.push(updateObjectEvent(asset))
+		//epcidPromises.push(updateObjectEvent(asset))
+		allEpcidPromises.push(updateObjectEvent(asset))
 	}     	
-	
+
+	console.log(allEpcidPromises.length)
+
+	if (allEpcidPromises.length < 50) {
+		return Promise.resolve()
+	}
+
 	return new Promise( (resolve,reject) => {
-		//console.log("before - wait for all promises")
-		var allEpcidPromises = Promise.all(epcidPromises)
+		console.log("wait for all pending promises")
+		console.log(allEpcidPromises.length)
+		var allPromises = Promise.all(allEpcidPromises)
 		
-		allEpcidPromises.then( function(res) {
+		allPromises.then( function(res) {
 			//console.log("after  - wait for all promises")
+			allEpcidPromises = []
+			console.log(allEpcidPromises.length)
  			resolve()
  		})
 	})
