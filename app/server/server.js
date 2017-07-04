@@ -14,8 +14,8 @@ require('rootpath')();
 var config = require(rootpath + '/../config.json');
 routes.init(express, app, router);
 
-//mongoService.secretTest()
-//process.exit(0)
+mongoService.secretTest()
+process.exit(0)
 
 mongoService.connect()
     .then(() =>{
