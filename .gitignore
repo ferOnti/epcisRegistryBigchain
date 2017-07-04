@@ -4,6 +4,7 @@ __pycache__
 .DS_Store
 config.bulk.json
 config.json
+app/crypto.config
 tx.json 
 
 

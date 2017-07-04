@@ -32,6 +32,7 @@ function getDiffieHellman() {
 function encryptMessage(secret, plain) {
     var cipher  = crypto.createCipher(algorithm, secret)
     var crypted = cipher.update(plain,'utf8','hex')
+    console.log(crypted)
     crypted += cipher.final('hex');
     return crypted;
 }
@@ -49,5 +50,5 @@ module.exports = {
     getDiffieHellman: getDiffieHellman,
     getHash: getHash,
     encryptMessage: encryptMessage,
-    decryptMessage: decryptMessage
+    decryptMessage: decryptMessage,
 }

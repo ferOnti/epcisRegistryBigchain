@@ -6,7 +6,8 @@ var router = express.Router();
 
 var routes = require("./routes.js");
 var eris   = require("./eris.js");
-var mongoService = require("./mongoService.js")
+var cryptoService = require("./cryptoService.js")
+var mongoService  = require("./mongoService.js")
 
 require('rootpath')();
 
@@ -14,20 +15,17 @@ require('rootpath')();
 var config = require(rootpath + '/../config.json');
 routes.init(express, app, router);
 
-mongoService.secretTest()
-process.exit(0)
+//mongoService.secretTest()
+//process.exit(0)
 
-mongoService.connect()
+cryptoService.init()
+    .then(mongoService.connect)
     .then(() =>{
         app.listen(config.app.port,function() {
             console.log("Live at Port " + config.app.port);
         });
     })
     .then (mongoService.getStats )
-//    .then (mongoService.secretTest )
-    .then (() => {mongoService.addAccount("party A")} )
-    .then (() => {mongoService.addAccount("party B")} )
-    .then (() => {mongoService.addAccount("party C")} )
     /*
     .then(() => {
         
