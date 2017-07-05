@@ -26,6 +26,11 @@ var todo = function () {
 	})	
 }
 
+var getPublicConfig = function() {
+	return new Promise((resolve, reject) => {
+		resolve(cryptoConfigService.getPublicConfig())
+	})
+}
 
 var getPublicKey = function () {
 	return new Promise((resolve, reject) => {
@@ -136,6 +141,7 @@ var deleteParticipant = function (id) {
 
 module.exports = {
 	init:            init,
+	getPublicConfig: getPublicConfig,
     getPublicKey:    getPublicKey,
     getChannels:     getChannels,
     getChannel:      todo,

@@ -1,9 +1,23 @@
 
 var mongoDB = null;
+var exphbs = require('express-handlebars');
 
 function init(express, app, router) {
     var path = rootpath + '/views/';
     var publicPath = rootpath + '/public';
+
+    //handlebars
+    let hbsOptions = {
+        defaultLayout: 'main', 
+        layoutsDir:  path + "/layouts/",
+        partialsDir: path + "/partials/",
+        extname: '.hbs'
+    }
+    app.engine('hbs', exphbs(hbsOptions));
+    app.set('view engine', 'hbs');
+
+    //app.set('views', path.join(__dirname, 'api/views/'));
+    app.set('views', path);
 
     app.use(express.static(publicPath));
 
@@ -21,7 +35,8 @@ function init(express, app, router) {
 
     //html pages
     router.get('/', function (req, res) {
-        res.sendFile(path + "index.html");
+        var params = []
+        res.render('index', params );
     });
 
     //favicon
@@ -43,6 +58,16 @@ function init(express, app, router) {
     });
 
     //crypto api
+    app.get('/crypto/config', function (req, res) {
+        var cryptoService = require("./cryptoService");
+        cryptoService.getPublicConfig()
+            .then((data) => { 
+                //console.log(data); 
+                res.send(data);
+            })
+        
+    });
+
     app.get('/crypto/publickey', function (req, res) {
         var cryptoService = require("./cryptoService");
         cryptoService.getPublicKey()

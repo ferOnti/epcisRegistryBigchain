@@ -69,6 +69,22 @@ var writeConfig = function() {
     return config
 }
 
+var getPublicConfig = function() {
+	if (config == null) {
+		console.error("Error, config is empty")
+		return null
+	}
+	result = {
+		name: config.name,
+		host: config.host,
+		port: config.port,
+		publicKey:config.publicKey, 
+		participants: config.participants,
+		channels: config.channels
+	}
+	return result
+}
+
 var getKey = function() {
 	if (config == null) {
 		console.error("Error, config is empty")
@@ -130,6 +146,7 @@ module.exports = {
 	serverKey       : serverKey,
 	channels        : channels,
 	init            : init,
+	getPublicConfig : getPublicConfig,
 	writeConfig     : writeConfig,
 	getKey          : getKey,
 	getChannels     : getChannels,

@@ -1,3 +1,6 @@
+
+//validate that one transaction is correct
+
 //var cc = requirefrom 'five-bells-condition'
 var clone = require('clone')
 var base58 = require('bs58')
