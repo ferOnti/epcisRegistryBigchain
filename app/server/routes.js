@@ -68,6 +68,16 @@ function init(express, app, router) {
         
     });
 
+    app.get('/crypto/nodeinfo', function (req, res) {
+        var cryptoService = require("./cryptoService");
+        cryptoService.getNodeInfo()
+            .then((data) => { 
+                console.log(data); 
+                res.send(data);
+            })
+        
+    });
+
     app.get('/crypto/publickey', function (req, res) {
         var cryptoService = require("./cryptoService");
         cryptoService.getPublicKey()

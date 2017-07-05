@@ -36,9 +36,17 @@
       <div class="panel panel-info">
         <div class="panel-body">
           <div class="form-group">
-            <label class="control-label col-sm-10" >
-              <button type="button" class="btn btn-default tab-header-button" 
-              onclick="addAccount()">add participant</button>
+            <label class="control-label col-sm-12" >
+              <button type="button" class="btn btn-default col-sm-12" 
+                onclick="getNodeInfo()">get node info</button>
+            </label>
+            <label class="control-label col-sm-12" >
+              <button type="button" class="btn btn-default col-sm-12" 
+              onclick="addParticipant()">add participant</button>
+            </label>
+            <label class="control-label col-sm-12" >
+              <button type="button" class="btn btn-default col-sm-12" 
+              onclick="changeNodeInfo()">change node info</button>
             </label>
           </div>
         </div>
@@ -59,12 +67,87 @@
 
 </div>
 
+<div class="modal fade" id="nodeInfoDialog" tabindex="-1" role="dialog" aria-labelledby="nodeInfoDialogLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="nodeInfoDialogLabel">Node Info</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="node-info" class="control-label">Copy this text and then paste into the "add participant" option in the remote VizixBigchain node</label>
+            <textarea cols="60" rows="8" class="form-control" id="node-info"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addParticipantDialog" tabindex="-1" role="dialog" aria-labelledby="addParticipantLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="addParticipantLabel">Add Participant to this Node</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="node-info" class="control-label">use the participant signature from remote VizixBigchain node</label>
+            <textarea cols="60" rows="8" class="form-control" id="node-signature"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Add Participant</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="changeInfoDialog" tabindex="-1" role="dialog" aria-labelledby="changeInfoDialogLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="changeInfoDialogLabel">Change Node Info</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="node-name" class="control-label">Node Name:</label>
+            <input type="text" class="form-control" id="node-name">
+          </div>
+          <div class="form-group">
+            <label for="node-host" class="control-label">Node Host:</label>
+            <input type="text" class="form-control" id="node-host">
+          </div>
+          <div class="form-group">
+            <label for="node-port" class="control-label">Node Port:</label>
+            <input type="text" class="form-control" id="node-port">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Send message</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script id="participants-template" type="text/x-handlebars-template">
 
   \{{#each participants}}
   <div class="row">
-    <div class="col-sm-10">
+    <div class="col-sm-9">
       <div class="panel panel-success">
         <div class="panel-heading">
           <h2 class="panel-title">\{{name}}</h2>
@@ -108,6 +191,20 @@
         </div>
       </div>
     </div>
+
+    <div class="col-sm-3">
+      <div class="panel panel-info">
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="control-label col-sm-12" >
+              <button type="button" class="btn btn-danger col-sm-12" 
+              onclick="addParticipant()">remove participant</button>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>        
+
   </div>
   \{{/each}}
 

@@ -4,8 +4,33 @@ var cryptoConfigService = require("./cryptoConfigService");
 
 
 const algorithm = 'aes-256-ctr';
-//const password  = 'd77c0d46ae188164391f67b5d8eb3883';
+const password  = 'd77c0d46ae188164391f67b5d8eb3883';
 
+function encrypt(text, input, output) {
+	if (!input ) {
+		input = 'utf8'
+	}
+	if (!output ) {
+		output = 'hex'
+	}
+    var cipher  = crypto.createCipher(algorithm, password)
+    var crypted = cipher.update(text, input, output)
+    crypted += cipher.final(output);
+    return crypted;
+}
+
+function decrypt(text, input, output){
+	if (!input ) {
+		input = 'utf8'
+	}
+	if (!output ) {
+		output = 'hex'
+	}
+    var decipher = crypto.createDecipher(algorithm, password)
+    var dec = decipher.update(text, input, output)
+    dec += decipher.final(output);
+    return dec;
+}
 
 var init = function () {
 	return new Promise((resolve, reject) => {
@@ -31,6 +56,21 @@ var getPublicConfig = function() {
 		resolve(cryptoConfigService.getPublicConfig())
 	})
 }
+var getNodeInfo = function() {
+	return new Promise((resolve, reject) => {
+		config = cryptoConfigService.getPublicConfig()
+		data = {
+			name: config.name,
+			host: config.host,
+			port: config.port,
+			publicKey:config.publicKey
+		}
+        
+    	plainJson = JSON.stringify(data)
+    	encodedJson = encrypt(plainJson, 'utf8', 'base64')
+		resolve(encodedJson)
+	})
+}                
 
 var getPublicKey = function () {
 	return new Promise((resolve, reject) => {
@@ -142,6 +182,7 @@ var deleteParticipant = function (id) {
 module.exports = {
 	init:            init,
 	getPublicConfig: getPublicConfig,
+	getNodeInfo:     getNodeInfo,
     getPublicKey:    getPublicKey,
     getChannels:     getChannels,
     getChannel:      todo,

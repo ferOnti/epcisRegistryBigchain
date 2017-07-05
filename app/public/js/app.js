@@ -133,6 +133,62 @@ function getParties() {
   });
 }
 
+function getNodeInfo() {
+  var options = {
+    backdrop: true,
+    keyboard: true, 
+    show: false
+  }
+  var dialog = $('#nodeInfoDialog').modal(options)
+
+  dialog.on('show.bs.modal', function(event) {
+    var modal = $(this)
+    //modal.find('.modal-title').text('Node Info')
+    $.get("/crypto/nodeInfo", function(data, status){
+      modal.find('#node-info').val(data)
+      console.log(data)
+    });
+  })
+
+  dialog.modal('show')
+}
+
+function changeNodeInfo() {
+  var options = {
+    backdrop: true,
+    keyboard: true, 
+    show: false
+  }
+  var dialog = $('#changeInfoDialog').modal(options)
+
+  dialog.on('show.bs.modal', function(event) {
+    var modal = $(this)
+    $.get("/crypto/config", function(data, status){
+      modal.find('.modal-body input').val(data)
+    });
+  })
+
+  dialog.modal('show')
+}
+
+function addParticipant() {
+  var options = {
+    backdrop: true,
+    keyboard: true, 
+    show: false
+  }
+  var dialog = $('#addParticipantDialog').modal(options)
+
+  dialog.on('show.bs.modal', function(event) {
+    var modal = $(this)
+    $.get("/crypto/config", function(data, status){
+      modal.find('.modal-body input').val(data)
+    });
+  })
+
+  dialog.modal('show')
+}
+
 function getCryptoConfig() {
   $.get("/crypto/config", function(data, status){
 

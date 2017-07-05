@@ -195,20 +195,25 @@ var countTransactions = function() {
 		    },
 		    function(err, results) {
 		        var sum = 0
-		        results.forEach(function(res) {
-		  	        if (res["_id"] == "CREATE") {
-		  	        	txs['create'] = res.value
-		  	        	sum += res.value
-		  	        }
-		  	        if (res["_id"] == "GENESIS") {
-		  	        	txs['genesis'] = res.value
-		  	        	sum += res.value
-		  	        }
-		  	        if (res["_id"] == "TRANSFER") {
-		  	        	txs['transfer'] = res.value
-		  	        	sum += res.value
-		  	        }
-		  		})
+		        txs['create'] = 0
+		        txs['genesis'] = 0
+		        txs['transfer'] = 0
+		        if (results && results.length > 0) {
+			        results.forEach(function(res) {
+			  	        if (res["_id"] == "CREATE") {
+			  	        	txs['create'] = res.value
+			  	        	sum += res.value
+			  	        }
+			  	        if (res["_id"] == "GENESIS") {
+			  	        	txs['genesis'] = res.value
+			  	        	sum += res.value
+			  	        }
+			  	        if (res["_id"] == "TRANSFER") {
+			  	        	txs['transfer'] = res.value
+			  	        	sum += res.value
+			  	        }
+			  		})
+			    }
   	        	txs['total'] = sum
   	        	res = {txs: txs}
   	        	resolve(res)
