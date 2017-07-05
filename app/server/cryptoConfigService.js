@@ -19,7 +19,7 @@ const emptyCrytoConfig = {
 
 var createConfigFile = function(cryptoConfigFile) {
 	var key = crypto.createECDH('secp256k1')
-	var config = emptyCrytoConfig
+	config = emptyCrytoConfig
 
 	key.generateKeys()
 	config.publicKey  = key.getPublicKey('hex')
@@ -36,7 +36,6 @@ var readConfigFile = function(cryptoConfigFile) {
 }
 
 var init = function () {
-   	var cryptoConfigFile = rootpath + '/crypto.config'
 	return new Promise((resolve, reject) => {
     	if (!fs.existsSync(cryptoConfigFile)) {
     		createConfigFile(cryptoConfigFile)
@@ -57,6 +56,9 @@ var init = function () {
 }
 
 var writeConfig = function() {
+   	var cryptoConfigFile = rootpath + '/crypto.config'
+   	console.log(config)
+   	console.log(cryptoConfigFile)
 	if (config == null) {
 		console.error("Error, config is empty")
 		return null

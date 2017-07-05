@@ -65,7 +65,6 @@ function init(express, app, router) {
 
     app.get('/crypto/channel/:id', function (req, res) {
         var id = req.params.id
-        console.log(req.body)
         var cryptoService = require("./cryptoService");
         cryptoService.getChannel(id)
             .then((data) => { 
@@ -119,6 +118,17 @@ function init(express, app, router) {
             })
     });
 
+    app.get('/crypto/participant/:id', function (req, res) {
+        var cryptoService = require("./cryptoService");
+        var id = req.params.id
+
+        cryptoService.getParticipant(id)
+            .then((data) => { 
+                res.json(data);
+            })
+            .catch((error) => {res.status(400).send(error)})
+    });
+
     app.post('/crypto/participant', function (req, res) {
         var cryptoService = require("./cryptoService");
         var name = req.body.name;
@@ -132,6 +142,18 @@ function init(express, app, router) {
             .then((data) => { 
                 res.json(data);
             })
+            .catch((error) => {res.status(400).send(error)})
+    });
+
+    app.delete('/crypto/participant/:id', function (req, res) {
+        var cryptoService = require("./cryptoService");
+        var id = req.params.id
+
+        cryptoService.deleteParticipant(id)
+            .then((data) => { 
+                res.json(data);
+            })
+            .catch((error) => {res.status(400).send(error)})
     });
 
     app.use("/", router);

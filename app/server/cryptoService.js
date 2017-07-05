@@ -58,20 +58,78 @@ var getParticipants = function () {
 	})	
 }
 
+var getParticipant = function (id) {
+	participants = cryptoConfigService.getParticipants()
+	var found = null
+	//first search by id
+	for (i in participants) {
+		//console.log(participants[i].name, name)
+		if (participants[i].id == id) {
+			found = i
+		}
+	}
+	//if not found, search by name
+	if (found == null) {
+		for (i in participants) {
+			if (participants[i].name == id) {
+				found = i
+			}
+		}
+	}
+	return new Promise((resolve, reject) => {
+		if (found == null) {
+			reject("participant with this id, does not exist")
+		} else {
+			resolve(participants[found])
+		}
+	})	
+}
+
 var postParticipant = function (name, host, port, publickey) {
 	//provide any validation over the name, host and port
 	//for the moment, just pass to cryptoConfig Service
 	participants = cryptoConfigService.getParticipants()
-	participants.push( {
-		name: name,
-		host: host,
-		port: port,
-		publickey
-	})
 	return new Promise((resolve, reject) => {
+		if (publickey.length!=130) {
+			return reject("publickey must be 130 hex caracters")
+		}
+
+		for (i in participants) {
+			//console.log(participants[i].name, name)
+			if (participants[i].name == name) {
+				return reject("the server name already exist in this node")
+			}
+		}
+		
+		participants.push( {
+			id: participants.length,
+			name: name,
+			host: host,
+			port: port,
+			publickey
+		})
 		cryptoConfigService.setParticipants(participants)
 		cryptoConfigService.writeConfig()
-	   	resolve(true)
+	   	resolve(cryptoConfigService.getParticipants())
+	})	
+}
+
+var deleteParticipant = function (id) {
+	participants = cryptoConfigService.getParticipants()
+	var found = null
+	//only search by id
+	for (i in participants) {
+		//console.log(participants[i].name, name)
+		if (participants[i].id == id) {
+			found = i
+		}
+	}
+	return new Promise((resolve, reject) => {
+		if (found == null) {
+			reject("participant with this id, does not exist")
+		} else {
+			resolve(participants)
+		}
 	})	
 }
 
@@ -85,7 +143,9 @@ module.exports = {
     deleteChannel:   todo,
     postRenameNode:  postRenameNode,
     getParticipants: getParticipants,
-    postParticipant: postParticipant
+    getParticipant:  getParticipant,
+    postParticipant: postParticipant,
+    deleteParticipant: deleteParticipant
 }
 
 
