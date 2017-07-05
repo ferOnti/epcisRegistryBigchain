@@ -121,12 +121,16 @@ function init(express, app, router) {
 
     app.post('/crypto/channel', function (req, res) {
         var cryptoService = require("./cryptoService");
-        //var id   = req.body.id;
-        //var name = req.body.name;
-        cryptoService.postChannel()
+        var participants = req.body.participants;
+        var name = req.body.name;
+        cryptoService.postChannel(name, participants)
             .then((data) => { 
                 console.log(data); 
                 res.json(data);
+            })
+            .catch((message) => {
+                var err = {error:true, message: message}
+                res.status(400).json(err)
             })
         
     });

@@ -48,6 +48,10 @@
               <button type="button" class="btn btn-default col-sm-12" 
               onclick="changeNodeInfo()">change node info</button>
             </label>
+            <label class="control-label col-sm-12" >
+              <button type="button" class="btn btn-default col-sm-12" 
+              onclick="createChannel()">create channel</button>
+            </label>
           </div>
         </div>
       </div>
@@ -139,7 +143,35 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Send message</button>
+        <button type="button" class="btn btn-primary" id="btnChangeInfo">Submit changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addChannelDialog" tabindex="-1" role="dialog" aria-labelledby="addChannelDialogLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="addChannelDialogLabel">Add Channel</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="channel-name" class="control-label">Channel Name:</label>
+            <input type="text" class="form-control" id="channel-name">
+          </div>
+
+          <div id="participantsCheckboxList">
+          </div>
+
+        </form>
+      </div>
+      <div id="addchannel-statusbar" class="alert alert-danger"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="btnAddChannel">Add Channel</button>
       </div>
     </div>
   </div>
@@ -209,6 +241,18 @@
 
   </div>
   \{{/each}}
+
+</script>
+
+<script id="participantscheckbox-template" type="text/x-handlebars-template">
+  <div class="form-group">
+    <label for="node-host" class="control-label">Participants:</label>
+    \{{#each participants}}
+    <div class="checkbox">
+      <label><input type="checkbox" name="part-\{{id}}" value="\{{name}}" >\{{name}}</label>
+    </div>
+    \{{/each}}
+  </div>
 
 </script>
 

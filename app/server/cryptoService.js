@@ -144,9 +144,7 @@ var postParticipantSignature = function (signature) {
 			reject("error parsing signature " + e)
 			return
     	}
-    	console.log("after parse")
     	var name = plainJson.name
-    	console.log(name)
 
 		participants = cryptoConfigService.getParticipants()
 		var found = null
@@ -202,6 +200,33 @@ var postParticipant = function (name, host, port, publickey) {
 	})	
 }
 
+var postChannel = function (name, participants) {
+	return new Promise((resolve, reject) => {
+		if (name=="") {
+			reject("channel name could not be empty string")
+			return
+		}
+
+		if (participants=="" || typeof participants == "undefined") {
+			reject("channel participants could not be empty list")
+			return
+		}
+		if (participants.constructor !== Array || participants.length == 0) {
+			reject("channel participants could not be empty list")
+		}
+
+		participants = cryptoConfigService.getParticipants()
+		var found = null
+		for (i in participants) {
+			if (participants[i].name == name) {
+				found = i
+			}
+		}
+
+   		resolve("todo: complete this")
+	})	
+}
+
 var deleteParticipant = function (id) {
 	participants = cryptoConfigService.getParticipants()
 	var found = null
@@ -229,7 +254,7 @@ module.exports = {
     getPublicKey:    getPublicKey,
     getChannels:     getChannels,
     getChannel:      todo,
-    postChannel:     todo,
+    postChannel:     postChannel,
     deleteChannel:   todo,
     postRenameNode:  postRenameNode,
     getParticipants: getParticipants,

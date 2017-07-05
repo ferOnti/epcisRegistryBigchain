@@ -1,12 +1,3 @@
-var Client = require('node-rest-client').Client;
-var client = null;
-var baseUrl = null;
-
-var config = {};
-var accounts;
-var account;
-
-var mainAccount = null;
 
 var initDialogs = function() {
 
@@ -37,7 +28,7 @@ var initDialogs = function() {
     modal.find('#node-signature').val("")
   })
 
-  var btnAddParticipant = $('#btnAddParticipant').modal(options)
+  var btnAddParticipant = $('#btnAddParticipant')
   btnAddParticipant.on('click', function(event) {
     var modal = $(this)
     var signature = $('#node-signature').val()
@@ -57,12 +48,68 @@ var initDialogs = function() {
       processData: false,
       dataType: "json",
       success: function(data, status){
+        getCryptoConfig()
+        $('#addpart-statusbar').show()
+        $('#addpart-statusbar').html("success")
         $('#addParticipantDialog').modal('hide')
+        $('#addpart-statusbar').hide()
       },
       error: function(error, status){
         err = error.responseJSON
         $('#addpart-statusbar').show()
         $('#addpart-statusbar').html(err.message)
+      }
+    });
+  })
+
+  //add channel 
+  var dialog3 = $('#addChannelDialog').modal(options)
+
+  dialog3.on('show.bs.modal', function(event) {
+    var modal = $(this)
+    $('#addchannel-statusbar').hide()
+    $('#addchannel-statusbar').html("")
+    //modal.find('#node-signature').val("")
+  })
+
+  var btnAddChannel = $('#btnAddChannel')
+  btnAddChannel.on('click', function(event) {
+    var modal = $(this)
+    var channelName = $('#channel-name').val()
+    var channelParticipants = []
+    $('input:checkbox:checked').each(function() {
+      channelParticipants.push($(this).val())
+    });
+
+    console.log(channelName)
+    console.log(channelParticipants)
+
+    //sanitize
+    channelName = channelName.replace(/[`~!@#$%^&*()_|\-?;:'",.<>\{\}\[\]\\]/gi, '')
+
+    if (typeof channelName == "undefined") {
+      channelName = ''
+    }
+    data = JSON.stringify({ name: channelName, participants: channelParticipants })
+
+    $.ajax({
+      url: "/crypto/channel",
+      method: "POST",
+      data: data,
+      contentType: "application/json",
+      processData: false,
+      dataType: "json",
+      success: function(data, status){
+        getCryptoConfig()
+        $('#addchannel-statusbar').show()
+        $('#addchannel-statusbar').html("success")
+        $('#addChannelDialog').modal('hide')
+        $('#addchannel-statusbar').hide()
+      },
+      error: function(error, status){
+        err = error.responseJSON
+        $('#addchannel-statusbar').show()
+        $('#addchannel-statusbar').html(err.message)
         console.error(err)
       }
     });
@@ -70,9 +117,9 @@ var initDialogs = function() {
   })
 
   //changeInfo
-  var dialog3 = $('#changeInfoDialog').modal(options)
+  var dialog4 = $('#changeInfoDialog').modal(options)
 
-  dialog3.on('show.bs.modal', function(event) {
+  dialog4.on('show.bs.modal', function(event) {
     var modal = $(this)
   })
 
@@ -88,101 +135,6 @@ function appendContractAddressToList(contractAddress)
     }
 }
 
-function getContractsAddrFromAccount(accountAddr) {
-  client.get(baseUrl + "contracts/"+accountAddr, {}, function (contracts, response) {
-    //console.log(contracts);
-
-    if (contracts.length != 0) {
-      //add contracts to the list
-      appendContract(accountAddr, contracts);
-
-
-      var seen = {};
-      $.each(contracts, function() {
-          appendContractAddressToList(this);
-      });
-
-    } else {
-      setStatusBar("warning", "There are zero contracts");
-    }
-  });
-}
-
-
-function addAccount() {
-    $.get("newAccount", function (data, status) {
-        appendAccount(data.name, data.publicKey, data.hostname);
-        if (typeof callback == "function") {
-            callback(data);
-        }
-    });
-}
-
-//get the accounts from backend and store them int the global accounts var
-function loadAccounts(callback) {
-    $.get("getAccounts", function (data, status) {
-        for (var i = 0; i < data.length; i++) {
-            var account = data[i];
-            /*
-             var name = '--';
-
-             for (var n in data.roleAccounts) {
-             if (data.roleAccounts[n].address == acc) {
-             name = n;
-             }
-             }
-             */
-            appendAccount(account.name, account.publicKey, account.hostname);
-        };
-
-        if (typeof callback == "function") {
-            callback(data);
-        }
-    });
-}
-
-//get the contracts from backend and store them int the global accounts var
-function loadContracts(callback) {
-    $.get("getContracts", function (data, status) {
-        for (var i = 0; i < data.length; i++) {
-            var contract = data[i];
-            /*
-             var name = '--';
-
-             for (var n in data.roleAccounts) {
-             if (data.roleAccounts[n].address == acc) {
-             name = n;
-             }
-             }
-             */
-            appendContract(contract);
-        };
-
-        if (typeof callback == "function") {
-            callback(data);
-        }
-    });
-}
-
-
-function getAccounts() {
-    $.get("getAccounts", function(data, status){
-        console.log(data);
-        for (var i = 0; i < data.length; i++) {
-          appendParty(data[i])
-        }
-
-    });
-}
-
-
-function getParties() {
-  $.get("/api/parties", function(data, status){
-    for (var i = 0; i < data.length; i++) {
-      appendParty(data[i])
-    }
-  });
-}
 
 function getNodeInfo() {
   $('#nodeInfoDialog').modal('show')
@@ -196,6 +148,16 @@ function addParticipant() {
   $('#addParticipantDialog').modal('show')
 }
 
+function createChannel() {
+  $('#addChannelDialog').modal('show')
+  $.get("/crypto/config", function(data, status){
+
+    var source   = $("#participantscheckbox-template").html();
+    var template = Handlebars.compile(source);
+    $('#participantsCheckboxList').html(template(data))
+  })
+}
+
 function getCryptoConfig() {
   $.get("/crypto/config", function(data, status){
 
@@ -207,7 +169,6 @@ function getCryptoConfig() {
     $('#node-server').html(data.host + ":" + data.port) 
     $('#node-publicKey').html(data.publicKey) 
     
-    //console.log (data)
   });
 }
 
@@ -225,41 +186,13 @@ function getStats() {
   });
 }
 
-function cleanDatabase() {
-    $.get("cleanDatabase", function(data) {
-
-    });
-}
-
-function updateMainAccount() {
-    var name = $('#main_name').val();
-    var hostname = $('#main_hostname').val();
-    var data = { id: mainAccount.id, name: name, hostname: hostname};
-    console.log(data);
-
-    $.post("updateMainAccount", data, function(data, status){
-        getMainAccount();
-    });
-}
-
 window.onload = function() {
-    initDialogs()
+  initDialogs()
 
-    getCryptoConfig();
-    getStats();
+  getCryptoConfig();
+  getStats();
 
-    setInterval(getStats, 4000)
-  /*
-  client = new Client();
-  baseUrl = window.location.href;
-
-  //get config file for the web app
-  client.get(baseUrl + "config", {}, function (clientConfig, response) {
-    config = clientConfig;
-    account = config.contractDeployer;
-
-  });
-  */
+  setInterval(getStats, 4000)
 
   //$('.navbar-nav a[href="#tab_blocks"]').tab('show')
   $('.navbar-nav a[href="#tab_participants"]').tab('show')
