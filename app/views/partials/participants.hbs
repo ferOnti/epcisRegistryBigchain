@@ -24,7 +24,7 @@
           <div class="form-group">
             <label class="control-label col-sm-4" for="type">public key:</label>
             <div class="col-sm-8">
-              <label  class="form-control" id="node-publicKey"></label>
+              <textarea rows="4" class="form-control" id="node-publicKey"></textarea>
             </div>
           </div>
         </div>
@@ -54,149 +54,34 @@
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-sm-10">
-      <div class="panel panel-success">
-        <div class="panel-heading">
-          <h2 class="panel-title">Party A</h2>
-        </div>
-
-        <div class="panel-body">
-
-          <div class="form-group">
-            <label class="control-label col-sm-4" for="type">public key:</label>
-            <div class="col-sm-8">
-              <label  class="form-control" id="publicKeyx">eJCQYhx64miL8YiLnT4e3LGZ57Yui11M78W3DbzHoBQu</label>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="control-label col-sm-4" for="type">private key:</label>
-            <div class="col-sm-8">
-              <label  class="form-control" id="publicKeyx">GZ57Yui11M78W3DbzHoBQeJCQYhx64miL8YiLnT4e3Lu</label>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="control-label col-sm-4" for="type">host key:</label>
-            <div class="col-sm-8">
-              <label  class="form-control" id="hostKey">W3DbzHoBQGZ57Yui11M78</label>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="control-label col-sm-4" for="type">Channels</label>
-            <div class="col-sm-8">
-              <a type="button" class="btn btn-default" onclick="addChannel()">add channel</a>
-            </div>
-          </div>
-
-          </span>
-
-          <div class="form-group">
-            <table id="table-channels" class="table table-striped table-bordered">
-              <thead>
-                <tr>
-                  <th>Channel Name</th>
-                  <th>shared secret</th>
-                  <th>participants</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Channel 0</td>
-                  <td>HoBQueJCQYhx64miL8YiLnT4e3LGZ57Yui11M78W3Dbz</td>
-                  <td>[Party A, Party B]</td>
-                </tr>
-                <tr>
-                  <td>Channel 1 - Contract/NS 1</td>
-                  <td>HoBQueJCQYhx64miL8YiLnT4e3LGZ57Yui11M78W3Dbz</td>
-                  <td>[Party A, Party B]</td>
-                </tr>
-                <tr>
-                  <td>Channel 3 - Contract/NS 2</td>
-                  <td>HoBQueJCQYhx64miL8YiLnT4e3LGZ57Yui11M78W3Dbz</td>
-                  <td>[Party A, Party B]</td>
-                </tr>
-                <tr>
-                  <td>Channel 2</td>
-                  <td>8YiLnT4e3LGZ57Yui11M78W3DbzHoBQueJCQYhx64miL</td>
-                  <td>[Party A, Party C]</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-      </div>
-    </div>
+  <div id="participantList">
   </div>
 
-  <!-- party B (fake) !-->
+</div>
+
+
+<script id="participants-template" type="text/x-handlebars-template">
+
+  \{{#each participants}}
   <div class="row">
     <div class="col-sm-10">
       <div class="panel panel-success">
         <div class="panel-heading">
-          <h2 class="panel-title">Party B</h2>
+          <h2 class="panel-title">\{{name}}</h2>
         </div>
 
         <div class="panel-body">
 
           <div class="form-group">
-            <label class="control-label col-sm-4" for="type">public key:</label>
+            <label class="control-label col-sm-4" for="type">node server:</label>
             <div class="col-sm-8">
-              <label  class="form-control" id="publicKeyx">6ba9b3094fbb4fb0c91936df98c73e5d</label>
+              <label  class="form-control" >\{{host}}:\{{port}}</label>
             </div>
           </div>
-          <div class="form-group">
-            <label class="control-label col-sm-4" for="type">host key:</label>
-            <div class="col-sm-8">
-              <label  class="form-control" id="hostKey">W3DbzHoBQGZ57Yui11M78</label>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <table id="table-channels" class="table table-striped table-bordered">
-              <thead>
-                <tr>
-                  <th>Channel Name</th>
-                  <th>shared secret</th>
-                  <th>participants</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Channel 1</td>
-                  <td>HoBQueJCQYhx64miL8YiLnT4e3LGZ57Yui11M78W3Dbz</td>
-                  <td>[Party A, Party B]</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- party C (fake) !-->
-  <div class="row">
-    <div class="col-sm-10">
-      <div class="panel panel-success">
-        <div class="panel-heading">
-          <h2 class="panel-title">Party C</h2>
-        </div>
-
-        <div class="panel-body">
-
           <div class="form-group">
             <label class="control-label col-sm-4" for="type">public key:</label>
             <div class="col-sm-8">
-              <label  class="form-control" id="publicKeyx">37f7d1391fb1d860036002130e365855</label>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="control-label col-sm-4" for="type">host key:</label>
-            <div class="col-sm-8">
-              <label  class="form-control" id="hostKey">W3DbzHoBQGZ57Yui11M78</label>
+              <textarea readonly="" rows="4" class="form-control">\{{publickey}}</textarea>
             </div>
           </div>
 
@@ -224,23 +109,7 @@
       </div>
     </div>
   </div>
+  \{{/each}}
 
+</script>
 
-
-  <div class="row">
-    <div class="col-sm-9">
-      <table id="table-parties" class="table table-striped table-bordered">
-        <thead>
-          <tr>
-            <th>Party Name</th>
-            <th>public key</th>
-            <th>private key</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-</div>

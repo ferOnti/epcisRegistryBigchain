@@ -135,15 +135,15 @@ function getParties() {
 
 function getCryptoConfig() {
   $.get("/crypto/config", function(data, status){
+
+    var source   = $("#participants-template").html();
+    var template = Handlebars.compile(source);
+    $('#participantList').html(template(data))
+    
     $('#node-name').html(data.name) 
     $('#node-server').html(data.host + ":" + data.port) 
-    $('#node-publicKey').html(data.publicKey.substr(0,30) + "..." + data.publicKey.substr(-10)) 
-    for (var i = 0; i < data.participants.length; i++) {
-      appendParty(data.participants[i])
-    }
-    for (var i = 0; i < data.channels.length; i++) {
-      appendParty(data.channels[i])
-    }
+    $('#node-publicKey').html(data.publicKey) 
+    
     console.log (data)
   });
 }
@@ -181,8 +181,6 @@ function updateMainAccount() {
 
 window.onload = function() {
     getCryptoConfig();
-    emptyTableParties();
-    getParties();
     getStats();
 
     setInterval(getStats, 4000)
