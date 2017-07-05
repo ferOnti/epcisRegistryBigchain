@@ -130,6 +130,49 @@ var getParticipant = function (id) {
 	})	
 }
 
+var postParticipantSignature = function (signature) {
+	return new Promise((resolve, reject) => {
+		if (signature=="") {
+			reject("signature could not be empty string")
+		}
+
+    	encodedJson = decrypt(signature, 'base64', 'utf8')
+    	console.log(encodedJson)
+        try {
+    	    plainJson = JSON.parse(encodedJson);
+    	} catch(e) {
+			reject("error parsing signature " + e)
+			return
+    	}
+    	console.log("after parse")
+    	var name = plainJson.name
+    	console.log(name)
+
+		participants = cryptoConfigService.getParticipants()
+		var found = null
+		for (i in participants) {
+			if (participants[i].name == name) {
+				found = i
+			}
+		}
+
+		if (found != null) {
+			reject("already exists participant with id '"+ name +"'")
+		} else {
+			participants.push( {
+				id: participants.length,
+				name: plainJson.name,
+				host: plainJson.host,
+				port: plainJson.port,
+				publickey: plainJson.publicKey  //todo: use upper-case
+			})
+			cryptoConfigService.setParticipants(participants)
+			cryptoConfigService.writeConfig()
+	   		resolve(cryptoConfigService.getParticipants())
+		}
+	})	
+}
+
 var postParticipant = function (name, host, port, publickey) {
 	//provide any validation over the name, host and port
 	//for the moment, just pass to cryptoConfig Service
@@ -192,7 +235,8 @@ module.exports = {
     getParticipants: getParticipants,
     getParticipant:  getParticipant,
     postParticipant: postParticipant,
-    deleteParticipant: deleteParticipant
+    deleteParticipant: deleteParticipant,
+    postSignature:   postParticipantSignature
 }
 
 

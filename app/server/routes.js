@@ -54,7 +54,7 @@ function init(express, app, router) {
     app.get('/api/stats', function (req, res) {
         var mongoService = require("./mongoService");
         mongoService.getStats()
-            .then((stats) => { console.log(stats); res.json(stats)} )
+            .then((stats) => { res.json(stats)} )
     });
 
     //crypto api
@@ -166,18 +166,33 @@ function init(express, app, router) {
 
     app.post('/crypto/participant', function (req, res) {
         var cryptoService = require("./cryptoService");
+        var signature = req.body.signature;
         var name = req.body.name;
         var host = req.body.host;
         var port = req.body.port;
         var publickey = req.body.publickey;
-        if (name == null || host == null || port == null || publickey == null) {
-            return res.status(400).send("invalid data")
+
+        if (signature!=null) {
+            cryptoService.postSignature(signature)
+                .then((data) => { 
+                    console.log(data)
+                    res.json(data);
+                })
+                .catch((message) => {
+                    var err = {error:true, message: message}
+                    res.status(400).json(err)
+                })
+
+        } else {
+            if (name == null || host == null || port == null || publickey == null) {
+                return res.status(400).send("invalid data")
+            }
+            cryptoService.postParticipant(name, host, port, publickey)
+                .then((data) => { 
+                    res.json(data);
+                })
+                .catch((error) => {res.status(400).send(error)})
         }
-        cryptoService.postParticipant(name, host, port, publickey)
-            .then((data) => { 
-                res.json(data);
-            })
-            .catch((error) => {res.status(400).send(error)})
     });
 
     app.delete('/crypto/participant/:id', function (req, res) {

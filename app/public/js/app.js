@@ -5,12 +5,78 @@ var baseUrl = null;
 var config = {};
 var accounts;
 var account;
-var balance;
-var lastContract = "";
-var lastThingsPacking;
 
 var mainAccount = null;
 
+var initDialogs = function() {
+
+  var options = {
+    backdrop: true,
+    keyboard: true, 
+    show: false
+  }
+
+  //nodeInfo
+  var dialog1 = $('#nodeInfoDialog').modal(options)
+
+  dialog1.on('show.bs.modal', function(event) {
+    var modal = $(this)
+    modal.find('#node-info').val("")
+    $.get("/crypto/nodeInfo", function(data, status){
+      modal.find('#node-info').val(data)
+    });
+  })
+
+  //addParticipant
+  var dialog2 = $('#addParticipantDialog').modal(options)
+
+  dialog2.on('show.bs.modal', function(event) {
+    var modal = $(this)
+    $('#addpart-statusbar').hide()
+    $('#addpart-statusbar').html("")
+    modal.find('#node-signature').val("")
+  })
+
+  var btnAddParticipant = $('#btnAddParticipant').modal(options)
+  btnAddParticipant.on('click', function(event) {
+    var modal = $(this)
+    var signature = $('#node-signature').val()
+    //sanitize
+    signature = signature.replace(/[`~!@#$%^&*()_|\-?;:'",.<>\{\}\[\]\\]/gi, '')
+
+    var data = '{"signature":""}'
+    if (typeof signature != "undefined") {
+      data = '{"signature":"' + signature + '"}'
+    }
+    
+    $.ajax({
+      url: "/crypto/participant",
+      method: "POST",
+      data: data,
+      contentType: "application/json",
+      processData: false,
+      dataType: "json",
+      success: function(data, status){
+        $('#addParticipantDialog').modal('hide')
+      },
+      error: function(error, status){
+        err = error.responseJSON
+        $('#addpart-statusbar').show()
+        $('#addpart-statusbar').html(err.message)
+        console.error(err)
+      }
+    });
+ 
+  })
+
+  //changeInfo
+  var dialog3 = $('#changeInfoDialog').modal(options)
+
+  dialog3.on('show.bs.modal', function(event) {
+    var modal = $(this)
+  })
+
+}
 
 var appendContractAddressToList_seen = {};
 function appendContractAddressToList(contractAddress)
@@ -40,21 +106,6 @@ function getContractsAddrFromAccount(accountAddr) {
       setStatusBar("warning", "There are zero contracts");
     }
   });
-}
-
-
-
-function addContract() {
-    const mainAccountId = mainAccount.id;
-    $.get("newContract?mainId="+mainAccountId, function (data, status) {
-
-        emptyTableContracts();
-        loadContracts();
-
-        if (typeof callback == "function") {
-            callback(data);
-        }
-    });
 }
 
 
@@ -134,59 +185,15 @@ function getParties() {
 }
 
 function getNodeInfo() {
-  var options = {
-    backdrop: true,
-    keyboard: true, 
-    show: false
-  }
-  var dialog = $('#nodeInfoDialog').modal(options)
-
-  dialog.on('show.bs.modal', function(event) {
-    var modal = $(this)
-    //modal.find('.modal-title').text('Node Info')
-    $.get("/crypto/nodeInfo", function(data, status){
-      modal.find('#node-info').val(data)
-      console.log(data)
-    });
-  })
-
-  dialog.modal('show')
+  $('#nodeInfoDialog').modal('show')
 }
 
 function changeNodeInfo() {
-  var options = {
-    backdrop: true,
-    keyboard: true, 
-    show: false
-  }
-  var dialog = $('#changeInfoDialog').modal(options)
-
-  dialog.on('show.bs.modal', function(event) {
-    var modal = $(this)
-    $.get("/crypto/config", function(data, status){
-      modal.find('.modal-body input').val(data)
-    });
-  })
-
-  dialog.modal('show')
+  $('#changeInfoDialog').modal('show')
 }
 
 function addParticipant() {
-  var options = {
-    backdrop: true,
-    keyboard: true, 
-    show: false
-  }
-  var dialog = $('#addParticipantDialog').modal(options)
-
-  dialog.on('show.bs.modal', function(event) {
-    var modal = $(this)
-    $.get("/crypto/config", function(data, status){
-      modal.find('.modal-body input').val(data)
-    });
-  })
-
-  dialog.modal('show')
+  $('#addParticipantDialog').modal('show')
 }
 
 function getCryptoConfig() {
@@ -200,13 +207,13 @@ function getCryptoConfig() {
     $('#node-server').html(data.host + ":" + data.port) 
     $('#node-publicKey').html(data.publicKey) 
     
-    console.log (data)
+    //console.log (data)
   });
 }
 
 function getStats() {
   $.get("/api/stats", function(data, status){
-    console.log(data);
+    //console.log(data);
     $('#totalBlocks').html(data.bigchain) 
     $('#totalVotes').html(data.votes) 
     $('#totalAssets').html(data.assets) 
@@ -236,6 +243,8 @@ function updateMainAccount() {
 }
 
 window.onload = function() {
+    initDialogs()
+
     getCryptoConfig();
     getStats();
 
@@ -252,6 +261,7 @@ window.onload = function() {
   });
   */
 
-  $('.navbar-nav a[href="#tab_blocks"]').tab('show')
+  //$('.navbar-nav a[href="#tab_blocks"]').tab('show')
+  $('.navbar-nav a[href="#tab_participants"]').tab('show')
 
 }

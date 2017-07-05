@@ -229,7 +229,7 @@ var pushResult = function(stats, res) {
 		o = {}
 		o[s] = res
 		stats.push(o );
-		console.log(stats)
+		//console.log(stats)
 		resolve(stats)
 	}) 
 
