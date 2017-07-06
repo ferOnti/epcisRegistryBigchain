@@ -129,6 +129,7 @@ function init(express, app, router) {
                 res.json(data);
             })
             .catch((message) => {
+                console.error(message)
                 var err = {error:true, message: message}
                 res.status(400).json(err)
             })

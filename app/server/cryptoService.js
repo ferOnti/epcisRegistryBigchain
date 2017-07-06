@@ -181,9 +181,8 @@ var postParticipant = function (name, host, port, publickey) {
 		}
 
 		for (i in participants) {
-			//console.log(participants[i].name, name)
 			if (participants[i].name == name) {
-				return reject("the server name already exist in this node")
+				return reject("A participant with the specified name already exists in this node")
 			}
 		}
 		
@@ -200,9 +199,44 @@ var postParticipant = function (name, host, port, publickey) {
 	})	
 }
 
+var getEmptyChannel = function(name) {
+
+	//the channel key used for each participant to 
+	//create and transfer assets in the channel
+    var channelKey = crypto.createECDH('secp256k1');  
+    channelKey.generateKeys()
+
+    //the channel hash is based in a plain text with random data
+    const salt = Math.round(Math.random()*10000000+100000)
+    const plainChannelHash = "channel : " + name + salt
+	const channelHash = crypto.createHash('sha256').update(plainChannelHash, 'utf8').digest('hex')
+	
+	//the first participant is this server
+	var config = cryptoConfigService.getPublicConfig()
+    var partyKey = crypto.createECDH('secp256k1');  
+    partyKey.generateKeys()
+
+	var firstParticipant = {
+		name: config.name,
+		server: config.host+":"+config.port,
+		publickey: partyKey.getPublicKey('hex'),
+		privatekey: partyKey.getPrivateKey('hex')
+	}
+
+	var channel = {
+		name: name,
+		publickey:  channelKey.getPublicKey('hex'),
+		privatekey: channelKey.getPrivateKey('hex'),
+		sharedHash: channelHash,
+		sharedSecret: "sharedSecret",
+		participants: [firstParticipant]
+	}
+	return channel
+}
+
 var postChannel = function (name, participants) {
 	return new Promise((resolve, reject) => {
-		if (name=="") {
+		if (typeof name == "undefined" || name=="") {
 			reject("channel name could not be empty string")
 			return
 		}
@@ -215,15 +249,68 @@ var postChannel = function (name, participants) {
 			reject("channel participants could not be empty list")
 		}
 
-		participants = cryptoConfigService.getParticipants()
-		var found = null
-		for (i in participants) {
-			if (participants[i].name == name) {
-				found = i
+		var allChannels = cryptoConfigService.getChannels()
+		for (i in allChannels) {
+			if (allChannels[i].name == name) {
+				return reject("A channel with the specified name already exists in this node")
 			}
 		}
 
-   		resolve("todo: complete this")
+		//build the channel object to be added to the list of channels
+		var channel = getEmptyChannel(name)
+
+		//get in an array the info for each participant
+		allParticipants = cryptoConfigService.getParticipants()
+
+		for (i in participants) {
+			for (j in allParticipants) {
+				if (participants[i] == allParticipants[j].name) {
+					channel.participants.push({
+						name: participants[i],
+						server: allParticipants[j].host+":"+allParticipants[j].port,
+						publickey: allParticipants[j].publickey
+					})
+				}
+			}
+		}
+
+		//second iteration, calculate the sharedHash encoded for each participant with his publickey
+		//alice is this node, and bob is each participant
+		const config = cryptoConfigService.getPublicConfig()
+		const alice = cryptoConfigService.getKey()
+		//crypto.createECDH('secp256k1');
+		//alice.setPrivateKey(config.privateKey,'hex')
+		//alice.setPublicKey (config.publicKey, 'hex')
+		console.log(alice)
+
+		for (i in channel.participants) {
+			if (typeof channel.participants[i].privatekey == "undefined") {
+				console.log(channel.participants[i])
+				//const bob = crypto.createECDH('secp256k1');  
+				//bob.setPublicKey (channel.participants[i].publickey, 'hex')
+				const partPublickey = channel.participants[i].publickey
+				const secret  = alice.computeSecret(partPublickey, 'hex', null);
+				console.log("secret :", secret)
+				const cipher = crypto.createCipher('aes-256-ctr', secret)
+				var encrypted = cipher.update(channel.sharedHash, 'utf8', 'hex')
+	  			encrypted += cipher.final('hex');
+				console.log(encrypted)
+				channel.participants[i].channelHashEncripted = encrypted
+			}
+		}
+
+		//add this channel to the array of all channels
+		allChannels.push(channel)
+
+		//and save it in the config file
+		cryptoConfigService.setChannels(allChannels)
+		cryptoConfigService.writeConfig()
+
+		//third iteration, send the channel to each participant to add it to their config file
+		
+	   	//resolve(cryptoConfigService.getChannels())
+	   	console.log(cryptoConfigService.getChannels())
+   		resolve(channel)
 	})	
 }
 

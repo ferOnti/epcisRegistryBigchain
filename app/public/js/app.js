@@ -63,12 +63,20 @@ var initDialogs = function() {
   })
 
   //add channel 
+  var changeProgressBar = function(percentage, label) {
+    $("#createChannelBar").show()
+    $("#createChannelBar").css("width", percentage);
+    $("#createChannelBarLabel").html(label)
+  }
+
   var dialog3 = $('#addChannelDialog').modal(options)
 
   dialog3.on('show.bs.modal', function(event) {
     var modal = $(this)
     $('#addchannel-statusbar').hide()
     $('#addchannel-statusbar').html("")
+    $("#createChannelBar").hide()
+    changeProgressBar("0%", "")
     //modal.find('#node-signature').val("")
   })
 
@@ -80,9 +88,6 @@ var initDialogs = function() {
     $('input:checkbox:checked').each(function() {
       channelParticipants.push($(this).val())
     });
-
-    console.log(channelName)
-    console.log(channelParticipants)
 
     //sanitize
     channelName = channelName.replace(/[`~!@#$%^&*()_|\-?;:'",.<>\{\}\[\]\\]/gi, '')
@@ -101,10 +106,11 @@ var initDialogs = function() {
       dataType: "json",
       success: function(data, status){
         getCryptoConfig()
-        $('#addchannel-statusbar').show()
-        $('#addchannel-statusbar').html("success")
-        $('#addChannelDialog').modal('hide')
         $('#addchannel-statusbar').hide()
+        $('#addchannel-statusbar').html("")
+        changeProgressBar("20%", "channel key")
+        //$('#addChannelDialog').modal('hide')
+        //$('#addchannel-statusbar').hide()
       },
       error: function(error, status){
         err = error.responseJSON

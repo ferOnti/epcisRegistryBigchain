@@ -5,7 +5,6 @@ var config = require('../../config.json');
 var mongoDB = null;
 var mongoClient = require('mongodb').MongoClient;
 
-var cryptojs = require("./cryptojs.js");
 var sprintf = require('sprintf').sprintf;
 
 var connectMongoServer = function() {
@@ -55,62 +54,6 @@ var getBlock = function() {
 
 }
 
-var addAccount = function(partyName) {
-    var collection = mongoDB.collection('participants');
-
-    var diffieHellman = cryptojs.getDiffieHellman();
-    var prime = diffieHellman.getPrime();
-    var primeHex = diffieHellman.getPrime('hex');
-
-    return new Promise((resolve, reject) => {
-	    // Find main account or create a new one in case it does not exists
-	    collection.find({ name:partyName}).toArray(function(err, docs) {
-	    	if (err) {
-	    		console.error(err)
-	    		reject(err)
-	    	}
-
-	        if (docs.length == 0) {
-	            var key = diffieHellman.generateKeys('hex');
-	            //console.log("    prime is " + primeHex);
-	            //console.log("    new public key: " + key);
-
-	            var mainAccount = {};
-	            mainAccount.name = partyName;
-	            mainAccount.privateKey = diffieHellman.getPrivateKey('hex');
-	            mainAccount.publicKey  = diffieHellman.getPublicKey('hex');
-	            mainAccount.prime      = diffieHellman.getPrime('hex');
-	            //mainAccount.main       = true;
-	            //mainAccount.hostname   = hostname;
-
-	            collection.insertOne(mainAccount);
-	            resolve(mainAccount)
-	        } else {
-	            resolve(docs[0]);
-	        }
-	    });
-    })
-}
-
-var getParties = function() {
-	return new Promise((resolve, reject) => {
-	    var collection = mongoDB.collection('participants');
-	    collection.find({ }).toArray(function(err, docs) {
-	    	console.log(docs)
-	    	resolve(docs);
-	    });
-	})
-    /*
-    collection.find({ }).each(function(err, doc) {
-      	if(doc) {
-        	// Got a document
-      	} else {
-        	db.close();
-        	return false;
-      	}
-    });
-    */
-}
 
 //simple counts
 var countBigchain = function() {
@@ -402,59 +345,12 @@ var secretTest = function() {
   encrypted += cipher.final('hex');
 	console.log(encrypted)
 
-	    const hash = cryptojs.getHash();
-	    var diffieHellman = cryptojs.getDiffieHellman();
-	    var prime = diffieHellman.getPrime();
-	    var primeHex = diffieHellman.getPrime('hex');
-
-        var contractId = 1;
-        var secret     = partyA.privateKey
-
-        var plain = "hello " + new Date().getTime()
-        var encrypted = cryptojs.encryptMessage(secret, plain);
-        console.log (encrypted);
-        var decrypted = cryptojs.decryptMessage(secret, encrypted);
-        console.log (decrypted);
-
-        console.log ("-----");
-
-        contractNumber = 1
-	    var contractName = "Contract # " + contractNumber;
-    	var contractPlainSecret = "secret " + contractNumber + "-"+ Math.random();
-
-
-    	hash.update(contractName);
-    	var contractSecret = hash.digest('hex');
-
-    	console.log("    contract secret: " + contractPlainSecret);
-/*
-                party1 = {};
-                party1.diffieHellman = cryptojs.getDiffieHellman();
-
-                party1.diffieHellman.generateKeys('hex');
-
-                party1.publicKey = party1.diffieHellman.getPublicKey('hex');
-                if (account.main) {
-                    party[i].privateKey = party[i].diffieHellman.getPrivateKey('hex');
-*/
-
-        var encrypted = cryptojs.encryptMessage(partyA.privateKey, contractSecret);
-        console.log (encrypted);
-
-        var encrypted = cryptojs.encryptMessage(partyB.privateKey, partyA.publicKey);
-        console.log (encrypted);
-
-    //})
-
-
 
 }
 
 module.exports = {
     connect:    connectMongoServer,
     getBlock:   getBlock,
-    addAccount: addAccount,
-    getParties: getParties,
     getStats:   getStats,
     secretTest: secretTest
 }

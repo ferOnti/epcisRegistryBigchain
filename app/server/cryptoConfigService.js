@@ -70,6 +70,7 @@ var writeConfig = function() {
 }
 
 var getPublicConfig = function() {
+   	config = readConfigFile(cryptoConfigFile)
 	if (config == null) {
 		console.error("Error, config is empty")
 		return null
