@@ -10,6 +10,7 @@
   "dependencies": {
     "bigchaindb-driver": "^0.2.0",
     "body-parser": "latest",
+    "bs58": "^4.0.1",
     "express": "latest",
     "express-handlebars": "^3.0.0",
     "line-by-line": "^0.1.5",
@@ -17,6 +18,7 @@
     "rootpath": "latest",
     "sprintf": "^0.1.5",
     "sync-request": "^4.1.0",
+    "tweetnacl": "^1.0.0",
     "xmljs": "^0.3.2"
   }
 }

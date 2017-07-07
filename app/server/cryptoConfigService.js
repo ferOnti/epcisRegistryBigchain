@@ -1,6 +1,5 @@
 var crypto   = require("crypto");
 var fs       = require('fs');
-var base58 = require('bs58')
 var Ed25519Keypair = require('./Ed25519Keypair')
 
 //global and exported variables
