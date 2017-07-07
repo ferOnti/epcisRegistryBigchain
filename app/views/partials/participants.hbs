@@ -59,6 +59,15 @@
   </div>
 
   <div class="row tab-header">
+    <div class="col-sm-12">
+      <h3>Channels</h3>
+    </div>
+  </div>
+
+  <div id="channelList">
+  </div>
+
+  <div class="row tab-header">
     <div class="col-sm-8">
       <h3>Participants</h3>
     </div>
@@ -183,6 +192,66 @@
   </div>
 </div>
 
+<div class="modal fade" id="getAssetDialog" tabindex="-1" role="dialog" aria-labelledby="addChannelDialogLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <form>
+          <div id="channelsCheckboxList">
+          </div>
+
+          <div class="form-group">
+            <label for="channel-name" class="control-label">Asset Id:</label>
+            <input type="text" class="form-control" id="assetId" value="4fd32a4630529ce9d7a7f468660c01c2bf89e16547091a3ec889b9ca2b6a99ef">
+          </div>
+
+          <div class="form-group">
+            <label for="channel-name" class="control-label">Result:</label>
+            <pre><code id="asset-result" class="xml"><br><br></code></pre>
+          </div>
+
+        </form>
+      </div>
+      <div id="getAsset-statusbar" class="alert alert-danger"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="btnGetAsset">getAsset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="createAssetDialog" tabindex="-1" role="dialog" >
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <form>
+          <div id="channels2CheckboxList">
+          </div>
+
+          <div class="form-group">
+            <label for="channel-name" class="control-label">Asset</label>
+            <textarea class="form-control" rows="8" id="assetData" >
+            </textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="control-label">Result:</label>
+            <pre><code id="createAsset-result" class="xml"><br><br></code></pre>
+          </div>
+
+        </form>
+      </div>
+      <div id="createAsset-statusbar" class="alert alert-danger"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="btnCreateAsset">create Asset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script id="participants-template" type="text/x-handlebars-template">
 
   \{{#each participants}}
@@ -207,7 +276,7 @@
               <textarea readonly="" rows="4" class="form-control">\{{publickey}}</textarea>
             </div>
           </div>
-
+          <!--  
           <br>Channels<br>
           <div class="form-group">
             <table id="table-channels" class="table table-striped table-bordered">
@@ -227,7 +296,7 @@
               </tbody>
             </table>
           </div>
-
+          !-->
         </div>
       </div>
     </div>
@@ -256,6 +325,91 @@
 
 </script>
 
+<script id="channels-template" type="text/x-handlebars-template">
+
+  \{{#each channels}}
+  <div class="row">
+    <div class="col-sm-9">
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <h2 class="panel-title">\{{name}}</h2>
+        </div>
+
+        <div class="panel-body">
+
+          <div class="form-group">
+            <label class="control-label col-sm-4" for="type">shared hash:</label>
+            <div class="col-sm-8">
+              <textarea readonly="" rows="3" class="form-control">\{{sharedHash}}</textarea>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-4" for="type">public key:</label>
+            <div class="col-sm-8">
+              <textarea readonly="" rows="4" class="form-control">\{{publickey}}</textarea>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-4" for="type">private key:</label>
+            <div class="col-sm-8">
+              <textarea readonly="" rows="3" class="form-control">\{{privatekey}}</textarea>
+            </div>
+          </div>
+
+          <br>Participants<br>
+          <div class="form-group">
+            <table id="table-channels" class="table table-striped table-bordered col-sm-6">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>server</th>
+                </tr>
+              </thead>
+              <tbody>
+                \{{#each participants}}
+                <tr>
+                  <td>\{{name}}</td>
+                  <td>\{{server}}</td>
+                </tr>
+                \{{/each}}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-3">
+      <div class="panel panel-info">
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="control-label col-sm-12" >
+              <button type="button" class="btn btn-default col-sm-12" 
+              onclick="getAsset('\{{name}}')">get asset</button>
+            </label>
+            <label class="control-label col-sm-12" >
+              <button type="button" class="btn btn-default col-sm-12" 
+              onclick="getAsset('\{{name}}')">get transaction</button>
+            </label>
+            <label class="control-label col-sm-12" >
+              <button type="button" class="btn btn-default col-sm-12" 
+              onclick="createAsset()">create asset</button>
+            </label>
+            <label class="control-label col-sm-12" >
+              <button type="button" class="btn btn-default col-sm-12" 
+              onclick="addParticipant()">transfer asset</button>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>        
+
+  </div>
+  \{{/each}}
+
+</script>
+
 <script id="participantscheckbox-template" type="text/x-handlebars-template">
   <div class="form-group">
     <label for="node-host" class="control-label">Participants:</label>
@@ -264,6 +418,20 @@
       <label><input type="checkbox" name="part-\{{id}}" value="\{{name}}" >\{{name}}</label>
     </div>
     \{{/each}}
+  </div>
+
+</script>
+
+<script id="channelcheckbox-template" type="text/x-handlebars-template">
+  <div class="form-group">
+    <label for="selectChannel" class="control-label">Channel:</label>
+    <select id="selectChannel">
+      <option value="">no channel</option>
+      \{{#each channels}}
+      <option value="\{{name}}">\{{name}}</option>
+   
+      \{{/each}}
+    </select>
   </div>
 
 </script>

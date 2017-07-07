@@ -15,8 +15,8 @@ var sha3_256 = require('js-sha3').sha3_256;
 var config = require('./config.bulk.json');
 
 const alice = new BigchainDB.Ed25519Keypair()
-alice.publicKey  = config.alice.publicKey
-alice.privateKey = config.alice.privateKey
+alice.publickey  = config.alice.publickey
+alice.privatekey = config.alice.privatekey
 
 
 epcisService.getTransaction("1875ac36593263c2d3f191f8d3fa785fa0c62f34b05d52f847bbf8e3e254c144")
@@ -47,8 +47,8 @@ validateInputsTx = function(data) {
 	tx = clone(data)
 	console.log("  there are " + tx.inputs.length + " inputs")
 	tx.inputs.forEach(function (input, index) {
-        //var publicKey = input.owners_before[index];
-        //console.log(publicKey)
+        //var publickey = input.owners_before[index];
+        //console.log(publickey)
         //fulfillment = input.fulfillment
         //console.log("fulfillment " + input.fulfillment)
         fulfillment = tx.inputs[index].fulfillment 
@@ -62,7 +62,7 @@ console.log("--")
 
 	    const serializedTransaction = BigchainDB.Transaction.serializeTransactionIntoCanonicalString(tx)
         const ed25519Fulfillment = new cc.Ed25519Sha256()
-        ed25519Fulfillment.setPublicKey( x.publicKey)
+        ed25519Fulfillment.setPublickey( x.publickey)
         ed25519Fulfillment.setSignature( x.signature)
         var isValid = false
         try {
@@ -96,18 +96,18 @@ makeTx = function(epcisAsset) {
 	    epcisAsset, //asset 
     	epcisAsset, //metadata
     	[ BigchainDB.Transaction.makeOutput(
-            BigchainDB.Transaction.makeEd25519Condition(alice.publicKey))
+            BigchainDB.Transaction.makeEd25519Condition(alice.publickey))
     	],
-    	alice.publicKey
+    	alice.publickey
 	)
 	console.log("---------")
 	console.log(tx)
 	console.log("---------")
  
- 	signTx(tx, alice.privateKey)
+ 	signTx(tx, alice.privatekey)
 
 	// Sign the transaction with private keys 
-	const txSigned = BigchainDB.Transaction.signTransaction(tx, alice.privateKey)
+	const txSigned = BigchainDB.Transaction.signTransaction(tx, alice.privatekey)
 	console.log(txSigned)
 
 }

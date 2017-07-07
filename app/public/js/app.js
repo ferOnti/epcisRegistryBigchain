@@ -129,6 +129,100 @@ var initDialogs = function() {
     var modal = $(this)
   })
 
+  //getAssetDialog
+  var dialog5 = $('#getAssetDialog').modal(options)
+
+  dialog5.on('show.bs.modal', function(event) {
+    var modal = $(this)
+    $('#getAsset-statusbar').hide()
+    $('#getAsset-statusbar').html("")
+    $('#asset-result').hide()
+    $('#asset-result').html("")
+  })
+
+  var btnGetAsset = $('#btnGetAsset')
+  btnGetAsset.on('click', function(event) {
+    var modal = $(this)
+    var channelName = $('#selectChannel').val()
+    var assetId     = $('#assetId').val()
+
+    //sanitize
+    assetId = assetId.replace(/[`~!@#$%^&*()_|\-?;:'",.<>\{\}\[\]\\]/gi, '')
+
+    data = JSON.stringify({ channel: channelName, assetId: assetId })
+    url = "/api/asset/" + assetId + "?channel="+channelName
+
+    $.get(url, function(data) { 
+        console.log("get")
+        console.log(data)
+        dataJson=JSON.stringify(data,null,4)
+        result = hljs.highlightAuto(dataJson).value
+    
+        $('#asset-result').show()
+        $('#asset-result').html(result)
+      })
+      .done(function(data) {
+        console.log("done")
+        console.log(data)
+      })
+      .fail(function(error) {
+        console.log(error)
+        err = error.responseJSON
+        $('#getAsset-statusbar').show()
+        $('#getAsset-statusbar').html(err.message)
+        console.error(err)
+      })
+  })
+
+  //createAssetDialog
+  var dialog6 = $('#createAssetDialog').modal(options)
+
+  dialog6.on('show.bs.modal', function(event) {
+    var modal = $(this)
+    $('#createAsset-statusbar').hide()
+    $('#createAsset-statusbar').html("")
+    $('#createAsset-result').hide()
+    $('#createAsset-result').html("")
+
+    assetData = { 
+      type: "sample-asset",
+      "name": "asset " + Math.round(Math.random()*10000+1000),
+      "date" : new Date().toISOString()
+    }
+    $('#assetData').html(JSON.stringify(assetData, null, 4))
+  })
+
+  var btnCreateAsset = $('#btnCreateAsset')
+  btnCreateAsset.on('click', function(event) {
+    var modal = $(this)
+    var channelName = $('#selectChannel').val()
+    var assetData     = $('#assetData').val()
+
+    data = JSON.stringify({ channel: channelName, assetData: assetData })
+    
+    $.ajax({
+      url: "/api/asset",
+      method: "POST",
+      data: data,
+      contentType: "application/json",
+      processData: false,
+      dataType: "json",
+      success: function(data, status){
+        dataJson=JSON.stringify(data,null,4)
+        result = hljs.highlightAuto(dataJson).value
+    
+        $('#createAsset-result').show()
+        $('#createAsset-result').html(result)
+      },
+      error: function(error, status){
+        err = error.responseJSON
+        $('#createAsset-statusbar').show()
+        $('#createAsset-statusbar').html(err.message)
+        console.error(err)
+      }
+    });
+
+  })
 }
 
 var appendContractAddressToList_seen = {};
@@ -171,6 +265,10 @@ function getCryptoConfig() {
     var template = Handlebars.compile(source);
     $('#participantList').html(template(data))
     
+    var source   = $("#channels-template").html();
+    var template = Handlebars.compile(source);
+    $('#channelList').html(template(data))
+
     $('#node-name').html(data.name) 
     $('#node-server').html(data.host + ":" + data.port) 
     $('#node-publicKey').html(data.publicKey) 
@@ -192,8 +290,37 @@ function getStats() {
   });
 }
 
+function getAsset(channel) {
+  $('#getAssetDialog').modal('show')
+  $('#assetChannelName').html(channel)
+
+  $.get("/crypto/config", function(data, status){
+
+    var source   = $("#channelcheckbox-template").html();
+    var template = Handlebars.compile(source);
+    $('#channelsCheckboxList').html(template(data))
+  })
+
+}
+
+function createAsset(channel) {
+  $('#createAssetDialog').modal('show')
+  //$('#assetChannelName').html(channel)
+
+  $.get("/crypto/config", function(data, status){
+
+    var source   = $("#channelcheckbox-template").html();
+    var template = Handlebars.compile(source);
+    $('#channels2CheckboxList').html(template(data))
+  })
+
+}
+
 window.onload = function() {
   initDialogs()
+  
+  //highlight scripts init
+  hljs.initHighlightingOnLoad();
 
   getCryptoConfig();
   getStats();

@@ -1,5 +1,7 @@
 var crypto   = require("crypto");
 var fs       = require('fs');
+var base58 = require('bs58')
+var Ed25519Keypair = require('./Ed25519Keypair')
 
 //global and exported variables
 var config    = null  //the whole config file content
@@ -18,12 +20,11 @@ const emptyCrytoConfig = {
 }
 
 var createConfigFile = function(cryptoConfigFile) {
-	var key = crypto.createECDH('secp256k1')
+	const key = new Ed25519Keypair()
 	config = emptyCrytoConfig
 
-	key.generateKeys()
-	config.publicKey  = key.getPublicKey('hex')
-	config.privateKey = key.getPrivateKey('hex')
+	config.publicKey  = key.publicKey
+	config.privateKey = key.privateKey
 
 	writeConfig()
     return config
@@ -43,13 +44,12 @@ var init = function () {
 
 	    //always read the config file
     	config = readConfigFile(cryptoConfigFile)
-    	//console.log(cryptoConfig.publicKey.length)
 
-    	if (config.privateKey.length != 64) {
+    	if (config.privateKey.length != 44) {
     		return reject("invalid private key")
     	}
-    	if (config.publicKey.length != 130) {
-    		return reject("invalid publicKey key")
+    	if (config.publicKey.length != 44) {
+    		return reject("invalid public key ")
     	}
     	resolve(true)
 	})	
@@ -57,7 +57,6 @@ var init = function () {
 
 var writeConfig = function() {
    	var cryptoConfigFile = rootpath + '/crypto.config'
-   	console.log(config)
    	console.log(cryptoConfigFile)
 	if (config == null) {
 		console.error("Error, config is empty")
@@ -79,9 +78,9 @@ var getPublicConfig = function() {
 		name: config.name,
 		host: config.host,
 		port: config.port,
-		publicKey:config.publicKey, 
-		participants: config.participants,
-		channels: config.channels
+		publicKey: config.publicKey, 
+		channels:  config.channels,
+		participants: config.participants
 	}
 	return result
 }
@@ -91,13 +90,15 @@ var getKey = function() {
 		console.error("Error, config is empty")
 		return null
 	}
-   	var resultKey = crypto.createECDH('secp256k1')
-   	resultKey.setPrivateKey(config.privateKey, 'hex')
-   	resultKey.setPublicKey (config.publicKey, 'hex')
+	const key = new Ed25519Keypair()
+	key.publicKey  = config.publicKey
+	key.privateKey = config.privateKey
+
    	return resultKey
 }
 
 var getChannels = function() {
+   	config = readConfigFile(cryptoConfigFile)
 	if (config == null) {
 		console.error("Error, config is empty")
 		return null
@@ -106,6 +107,7 @@ var getChannels = function() {
 }
 
 var setChannels = function(channels) {
+   	config = readConfigFile(cryptoConfigFile)
 	if (config == null) {
 		console.error("Error, config is empty")
 		return null
@@ -128,6 +130,7 @@ var renameNode = function (name, host, port) {
 }
 
 var getParticipants = function() {
+   	config = readConfigFile(cryptoConfigFile)
 	if (config == null) {
 		console.error("Error, config is empty")
 		return null

@@ -57,6 +57,38 @@ function init(express, app, router) {
             .then((stats) => { res.json(stats)} )
     });
 
+    app.get('/api/asset/:id', function (req, res) {
+        var id = req.params.id
+        var epcisService = require("./epcisService");
+        epcisService.getAsset(id)
+            .then((stats) => { res.json(stats)} )
+            .catch((message) => {
+                console.error(message)
+                res.status(400).json({error:true, message: message})
+            })
+
+    });
+
+    app.post('/api/asset', function (req, res) {
+        var cryptoService = require("./cryptoService");
+        var epcisService = require("./epcisService");
+        var channel = req.body.channel;
+        var assetData = req.body.assetData;
+
+        epcisService.postAsset(channel, assetData)
+            .then((data) => { 
+                console.log(data)
+                res.json(data);
+            })
+            .catch((message) => {
+                if (typeof message == "object") {
+                    console.error(message)
+                }
+                var err = {error:true, message: message}
+                res.status(400).json(err)
+            })
+    });
+
     //crypto api
     app.get('/crypto/config', function (req, res) {
         var cryptoService = require("./cryptoService");

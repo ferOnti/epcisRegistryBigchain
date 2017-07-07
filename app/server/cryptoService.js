@@ -36,9 +36,6 @@ var init = function () {
 	return new Promise((resolve, reject) => {
 	   	cryptoConfigService.init()
    			.then(() => {
-   				//key = cryptoConfigService.getKey()
-   				//console.log(key.getPublicKey() )
-   				//resolve(key.getPrivateKey())
    				resolve(true)
    			})
 	})
@@ -72,11 +69,24 @@ var getNodeInfo = function() {
 	})
 }                
 
+var getKey = function () {
+	return cryptoConfigService.getKey()
+}
+
 var getPublicKey = function () {
-	return new Promise((resolve, reject) => {
-		key = cryptoConfigService.getKey()
-	   	resolve(key.getPublicKey('hex'))
-	})	
+	return Promise.resolve(cryptoConfigService.getKey().publicKey)
+	//return new Promise((resolve, reject) => {
+	//	key = cryptoConfigService.getKey()
+	//   	resolve(key.publicKey)
+	//})	
+}
+
+var getPrivateKey = function () {
+	return Promise.resolve(cryptoConfigService.getKey().privateKey)
+	//return new Promise((resolve, reject) => {
+	//	key = cryptoConfigService.getKey()
+	//   	resolve(key.getPrivateKey('hex'))
+	//})	
 }
 
 var getChannels = function () {
@@ -162,7 +172,7 @@ var postParticipantSignature = function (signature) {
 				name: plainJson.name,
 				host: plainJson.host,
 				port: plainJson.port,
-				publickey: plainJson.publicKey  //todo: use upper-case
+				publicKey: plainJson.publicKey  
 			})
 			cryptoConfigService.setParticipants(participants)
 			cryptoConfigService.writeConfig()
@@ -171,7 +181,7 @@ var postParticipantSignature = function (signature) {
 	})	
 }
 
-var postParticipant = function (name, host, port, publickey) {
+var postParticipant = function (name, host, port, publicKey) {
 	//provide any validation over the name, host and port
 	//for the moment, just pass to cryptoConfig Service
 	participants = cryptoConfigService.getParticipants()
@@ -191,7 +201,7 @@ var postParticipant = function (name, host, port, publickey) {
 			name: name,
 			host: host,
 			port: port,
-			publickey
+			publicKey:publicKey
 		})
 		cryptoConfigService.setParticipants(participants)
 		cryptoConfigService.writeConfig()
@@ -203,8 +213,9 @@ var getEmptyChannel = function(name) {
 
 	//the channel key used for each participant to 
 	//create and transfer assets in the channel
-    var channelKey = crypto.createECDH('secp256k1');  
-    channelKey.generateKeys()
+    //x var channelKey = crypto.createECDH('secp256k1');  
+    //x channelKey.generateKeys()
+	const channelKey = new Ed25519Keypair()
 
     //the channel hash is based in a plain text with random data
     const salt = Math.round(Math.random()*10000000+100000)
@@ -213,20 +224,21 @@ var getEmptyChannel = function(name) {
 	
 	//the first participant is this server
 	var config = cryptoConfigService.getPublicConfig()
-    var partyKey = crypto.createECDH('secp256k1');  
-    partyKey.generateKeys()
+    //x var partyKey = crypto.createECDH('secp256k1');  
+    //x partyKey.generateKeys()
+	const partyKey = new Ed25519Keypair()
 
 	var firstParticipant = {
 		name: config.name,
 		server: config.host+":"+config.port,
-		publickey: partyKey.getPublicKey('hex'),
-		privatekey: partyKey.getPrivateKey('hex')
+		publicKey:  partyKey.publicKey,
+		privateKey: partyKey.privateKey
 	}
 
 	var channel = {
 		name: name,
-		publickey:  channelKey.getPublicKey('hex'),
-		privatekey: channelKey.getPrivateKey('hex'),
+		publickey:  channelKey.publicKey,
+		privatekey: channelKey.privateKey,
 		sharedHash: channelHash,
 		sharedSecret: "sharedSecret",
 		participants: [firstParticipant]
@@ -268,7 +280,7 @@ var postChannel = function (name, participants) {
 					channel.participants.push({
 						name: participants[i],
 						server: allParticipants[j].host+":"+allParticipants[j].port,
-						publickey: allParticipants[j].publickey
+						publicKey: allParticipants[j].publicKey
 					})
 				}
 			}
@@ -338,7 +350,9 @@ module.exports = {
 	init:            init,
 	getPublicConfig: getPublicConfig,
 	getNodeInfo:     getNodeInfo,
+    getKey:          getKey,
     getPublicKey:    getPublicKey,
+    getPrivateKey:   getPrivateKey,
     getChannels:     getChannels,
     getChannel:      todo,
     postChannel:     postChannel,
