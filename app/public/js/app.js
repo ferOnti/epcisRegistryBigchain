@@ -271,6 +271,25 @@ function appendContractAddressToList(contractAddress)
     }
 }
 
+function showInfoDialog(title, message, error) {
+  $('#info-dialog-title').html(title)
+  if (message && message != "") {
+    $('#info-dialog-alert').show()
+    $('#info-dialog-alert').html(message)
+  } else {
+    $('#info-dialog-alert').hide()
+    $('#info-dialog-alert').html("")
+  }
+  if (error && error != "") {
+    $('#info-dialog-error').show()
+    $('#info-dialog-error').html(error)
+  } else {
+    $('#info-dialog-error').hide()
+    $('#info-dialog-error').html("")
+  }
+  $('#infoDialog').modal('show')
+
+}
 
 function getNodeInfo() {
   $('#nodeInfoDialog').modal('show')
@@ -310,6 +329,52 @@ function reloadNodeInfo() {
     $('#node-publicKey').html(data.publicKey) 
     
   });
+}
+
+function removeParticipant(nodeName) {
+  showInfoDialog("remove participant", "processing...")
+  //data = JSON.stringify({ node: node, publicKey: publicKey })
+    
+  $.ajax({
+    url: "/crypto/participant/"+nodeName,
+    method: "DELETE",
+    //data: data,
+    contentType: "application/json",
+    //processData: false,
+    //dataType: "json",
+    success: function(data, status){
+      console.log(data)
+       showInfoDialog("remove participant", data.message);
+       reloadNodeInfo()
+    },
+    error: function(error, status){
+       showInfoDialog("remove participant",null, status.message);
+      console.log(status)
+    }
+  });
+}
+
+function testConnection(node, publicKey) {
+  showInfoDialog("test remote connection", "testing...")
+  data = JSON.stringify({ node: node, publicKey: publicKey })
+    
+  $.ajax({
+    url: "/crypto/remotenode",
+    method: "POST",
+    data: data,
+    contentType: "application/json",
+    processData: false,
+    dataType: "json",
+    success: function(data, status){
+      console.log(data)
+       showInfoDialog("test remote connection", data.message);
+    },
+    error: function(error, status){
+       showInfoDialog("test remote connection",null, status.message);
+      console.log(status)
+    }
+  });
+
 }
 
 function getStats() {

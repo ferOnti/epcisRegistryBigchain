@@ -140,6 +140,41 @@ var getParticipant = function (id) {
 	})	
 }
 
+var deleteParticipant = function (id) {
+	participants = cryptoConfigService.getParticipants()
+	var found = null
+	//first search by id
+	for (i in participants) {
+		if (participants[i].id == id) {
+			found = i
+		}
+	}
+	//if not found, search by name
+	if (found == null) {
+		for (i in participants) {
+			if (participants[i].name == id) {
+				found = i
+			}
+		}
+	}
+	return new Promise((resolve, reject) => {
+		if (found == null) {
+			reject("participant with this id, does not exist")
+		} else {
+			var parties = []
+			for (i in participants) {
+				if (i != found) {
+					parties.push(participants[i])
+				}
+			}
+			cryptoConfigService.setParticipants(parties)
+			cryptoConfigService.writeConfig()
+
+			resolve( {error:false, message: "participant removed"})
+		}
+	})	
+}
+
 var postParticipantSignature = function (signature) {
 	return new Promise((resolve, reject) => {
 		if (signature=="") {
@@ -325,26 +360,6 @@ var postChannel = function (name, participants) {
    		resolve(channel)
 	})	
 }
-
-var deleteParticipant = function (id) {
-	participants = cryptoConfigService.getParticipants()
-	var found = null
-	//only search by id
-	for (i in participants) {
-		//console.log(participants[i].name, name)
-		if (participants[i].id == id) {
-			found = i
-		}
-	}
-	return new Promise((resolve, reject) => {
-		if (found == null) {
-			reject("participant with this id, does not exist")
-		} else {
-			resolve(participants)
-		}
-	})	
-}
-
 
 module.exports = {
 	init:            init,

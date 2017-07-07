@@ -2,6 +2,16 @@
 var mongoDB = null;
 var exphbs = require('express-handlebars');
 
+function returnError(res, message) {
+    if (typeof message == "object") {
+        console.error(message)
+        res.status(500).json({error:true, message: "Internal Error"})
+    } else {
+        var err = {error:true, message: message}
+        res.status(200).json(err)
+    }
+}
+
 function init(express, app, router) {
     var path = rootpath + '/views/';
     var publicPath = rootpath + '/public';
@@ -43,13 +53,6 @@ function init(express, app, router) {
     router.get("/favicon.ico",function(req,res){
         res.sendFile(path + "public/favicon.ico");
     });
-
-    //api
-    //app.get('/api/parties', function (req, res) {
-    //    var mongoService = require("./mongoService");
-    //    mongoService.getParties()
-    //        .then((parties) => {res.json(parties)} )
-    //});
 
     app.get('/api/stats', function (req, res) {
         var mongoService = require("./mongoService");
@@ -99,6 +102,18 @@ function init(express, app, router) {
             })
         
     });
+    app.post('/crypto/remotenode', function(req, res) {
+        var node = req.body.node;
+        var publicKey = req.body.publicKey;
+
+        var netService = require("./netService")
+        netService.testRemoteNode(node, publicKey)
+            .then((data) => {
+                res.send(data)
+            }) 
+            .catch((message) => { returnError(res, message)})
+
+    })
 
     app.get('/crypto/nodeinfo', function (req, res) {
         var cryptoService = require("./cryptoService");
@@ -199,6 +214,17 @@ function init(express, app, router) {
                 res.json(data);
             })
             .catch((error) => {res.status(400).send(error)})
+    });
+
+    app.delete('/crypto/participant/:id', function (req, res) {
+        var cryptoService = require("./cryptoService");
+        var id = req.params.id
+console.log(id)
+        cryptoService.deleteParticipant(id)
+            .then((data) => { 
+                res.json(data);
+            })
+            .catch((error) => {res.status(200).send(error)})
     });
 
     app.post('/crypto/participant', function (req, res) {

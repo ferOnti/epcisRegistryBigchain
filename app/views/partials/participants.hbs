@@ -273,7 +273,7 @@
           <div class="form-group">
             <label class="control-label col-sm-4" for="type">public key:</label>
             <div class="col-sm-8">
-              <textarea readonly="" rows="4" class="form-control">\{{publickey}}</textarea>
+              <label  class="form-control" >\{{publicKey}}</label>
             </div>
           </div>
           <!--  
@@ -307,13 +307,13 @@
           <div class="form-group">
             <label class="control-label col-sm-12" >
               <button type="button" class="btn btn-default col-sm-12" 
-              onclick="testConnection()">test connection</button>
+              onclick="testConnection('\{{host}}:\{{port}}','\{{publicKey}}')">test connection</button>
             </label>
           </div>
           <div class="form-group">
             <label class="control-label col-sm-12" >
               <button type="button" class="btn btn-danger col-sm-12" 
-              onclick="addParticipant()">remove participant</button>
+              onclick="removeParticipant('\{{name}}')">remove participant</button>
             </label>
           </div>
         </div>

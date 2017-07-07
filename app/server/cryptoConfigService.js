@@ -24,7 +24,7 @@ var createConfigFile = function(cryptoConfigFile) {
 
 	config.publicKey  = key.publicKey
 	config.privateKey = key.privateKey
-
+	console.log("creating and empty crypto config file")
 	writeConfig()
     return config
 }
@@ -56,7 +56,6 @@ var init = function () {
 
 var writeConfig = function() {
    	var cryptoConfigFile = rootpath + '/crypto.config'
-   	console.log(cryptoConfigFile)
 	if (config == null) {
 		console.error("Error, config is empty")
 		return null
