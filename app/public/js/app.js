@@ -48,7 +48,7 @@ var initDialogs = function() {
       processData: false,
       dataType: "json",
       success: function(data, status){
-        getCryptoConfig()
+        reloadNodeInfo()
         $('#addpart-statusbar').show()
         $('#addpart-statusbar').html("success")
         $('#addParticipantDialog').modal('hide')
@@ -105,7 +105,7 @@ var initDialogs = function() {
       processData: false,
       dataType: "json",
       success: function(data, status){
-        getCryptoConfig()
+        reloadNodeInfo()
         $('#addchannel-statusbar').hide()
         $('#addchannel-statusbar').html("")
         changeProgressBar("20%", "channel key")
@@ -127,6 +127,42 @@ var initDialogs = function() {
 
   dialog4.on('show.bs.modal', function(event) {
     var modal = $(this)
+    $.get("/crypto/config", function(data, status){
+      console.log(data, status)
+      $("#change-node-name").val(data.name)
+      $("#change-node-host").val(data.host)
+      $("#change-node-port").val(data.port)
+    })
+  })
+
+  var btnChangeInfo = $('#btnChangeInfo')
+  btnChangeInfo.on('click', function(event) {
+    var modal = $(this)
+    var nodeName = $('#change-node-name').val()
+    var nodeHost = $('#change-node-host').val()
+    var nodePort = $('#change-node-port').val()
+
+    data = JSON.stringify({ name: nodeName, host: nodeHost, port: nodePort })
+    
+    $.ajax({
+      url: "/crypto/rename",
+      method: "POST",
+      data: data,
+      contentType: "application/json",
+      processData: false,
+      dataType: "json",
+      success: function(data, status){
+        reloadNodeInfo()
+        $('#changeInfoDialog').modal('hide')
+      },
+      error: function(error, status){
+        err = error.responseJSON
+        $('#createAsset-statusbar').show()
+        $('#createAsset-statusbar').html(err.message)
+        console.error(err)
+      }
+    });
+
   })
 
   //getAssetDialog
@@ -258,7 +294,7 @@ function createChannel() {
   })
 }
 
-function getCryptoConfig() {
+function reloadNodeInfo() {
   $.get("/crypto/config", function(data, status){
 
     var source   = $("#participants-template").html();
@@ -322,7 +358,7 @@ window.onload = function() {
   //highlight scripts init
   hljs.initHighlightingOnLoad();
 
-  getCryptoConfig();
+  reloadNodeInfo();
   getStats();
 
   setInterval(getStats, 4000)
