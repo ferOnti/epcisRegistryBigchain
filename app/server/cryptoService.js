@@ -354,7 +354,6 @@ var postChannel = function (name, participants) {
 		//the clonedChannel is the message to be encrypted with all and each party's publicKey
 		var stringify = require('json-stable-stringify');
 		var message = nacl.util.decodeUTF8( stringify(clonedChannel) )
-	//console.log(clonedChannel)
 
 		//get participant with the secretKey, the first participant
 		var myPublicKey = ""
@@ -369,10 +368,6 @@ var postChannel = function (name, participants) {
 			}
 		}
 /*		
-		console.log("   ----")
-  var clientKeys = nacl.box.keyPair();
-  //var serverKeys = nacl.box.keyPair();
-  var serverKeysPair = new cryptoConfigService.compatBdbKeyPair()
   var serverKeys = serverKeysPair.keyPair
   //serverKeys.publicKey = myPublicKey
   //serverKeys.secretKey = mySecretKey
@@ -407,21 +402,21 @@ var postChannel = function (name, participants) {
 				console.log('  ->',bs58.encode(mySecretKey))
 
 				encryptedMessage = nacl.box(message, nonce, theirPublicKey, mySecretKey)
-//								nacl.box(message, nonce, theirPublicKey, mySecretKey)
 
 				var encrypted = bs58.encode(encryptedMessage)
-				console.log(encrypted)
+				//console.log(encrypted)
 		
-			var theirSecretKey = bs58.decode("AEgSu1timjC7YWz6KvNh7CSXHgarGXBvqtpHwMcz6P7P")
+			var theirSecretKey = bs58.decode("8whQGNn7PbdUbpBxQGwHPYwgNnDnhruM5LMfouCHPbm3")
 				console.log('  <-',bs58.encode(nonce))
 				console.log('  <-',bs58.encode(myPublicKey))
 				console.log('  <-',bs58.encode(theirSecretKey))
 				var decrypted = nacl.box.open(encryptedMessage, nonce, myPublicKey, theirSecretKey)
-//								nacl.box.open(box, nonce, theirPublicKey, mySecretKey)
-				console.log(decrypted)
 
+				if (decrypted != null) {
+					console.log(nacl.util.encodeUTF8(decrypted))
+				}			
 	
-				channel.participants[i].channelEncripted = encrypted
+				//channel.participants[i].channelEncripted = encrypted
 				var netService = require("./netService")
 				var encryptedJson = {
 					name: channel.name,
@@ -450,7 +445,7 @@ var postChannel = function (name, participants) {
 	})	
 }
 
-var postRemoteChannel = function(name, nonce, message) {
+var postRemoteChannel = function(name, nonce, publicKey, message) {
 	return new Promise((resolve, reject) => {
 		if (typeof name == "undefined" || name=="") {
 			reject("channel name could not be empty string")
@@ -462,25 +457,38 @@ var postRemoteChannel = function(name, nonce, message) {
 			return
 		}
 
+		if (typeof publicKey == "undefined" || publicKey=="") {
+			reject("publicKey could not be empty string")
+			return
+		}
+
 		if (typeof message == "undefined" || message=="") {
 			reject("message could not be empty string")
 			return
 		}
 
+		const thisKey = cryptoConfigService.getKeyPair()
+
 		//console.log(message)
 		var box = nacl.util.decodeUTF8(message)
 		var thisNonce = bs58.decode(nonce)
-		var theirPublicKey = bs58.decode("E7Jy44YWt4Vh8ysmVGufJHsgcB1pqYgr3ChFgZhWxPkQ")
-		var mySecretKey = bs58.decode("AEgSu1timjC7YWz6KvNh7CSXHgarGXBvqtpHwMcz6P7P")
+		var theirPublicKey = bs58.decode(publicKey)
+
+		var secretKey = bs58.decode(thisKey.secretKey)
 
 		console.log( theirPublicKey)
 		console.log( bs58.encode(theirPublicKey))
-		var decrypted = nacl.box.open(box, thisNonce, theirPublicKey, mySecretKey)
+		var decrypted = nacl.box.open(box, thisNonce, theirPublicKey, secretKey)
 
-		console.log( decrypted)
-		console.log( nacl.util.encodeUTF8(decrypted))
+		if (decrypted == null) {
+			reject("error opening the encrypted message")
+		} else {
+			//console.log( decrypted)
+			decryptedMessage = nacl.util.encodeUTF8(decrypted)
+			console.log( decryptedMessage)
+			resolve(decryptedMessage)
+		}
 
-		resolve(nacl.util.encodeUTF8(decrypted))
 	})
 
 }

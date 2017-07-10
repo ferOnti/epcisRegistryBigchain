@@ -192,11 +192,12 @@ function init(express, app, router) {
 
     app.post('/crypto/channel/remote', function (req, res) {
         var cryptoService = require("./cryptoService");
-        var name    = req.body.name;
-        var nonce   = req.body.nonce;
-        var message = req.body.message;
+        var name      = req.body.name;
+        var nonce     = req.body.nonce;
+        var publicKey = req.body.publicKey
+        var message   = req.body.message;
 
-        cryptoService.postRemoteChannel(name, nonce, message)
+        cryptoService.postRemoteChannel(name, nonce, publicKey, message)
             .then((data) => { 
                 //console.log(data); 
                 res.json(data);
