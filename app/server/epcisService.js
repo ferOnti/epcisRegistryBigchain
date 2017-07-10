@@ -91,7 +91,6 @@ var postEpcisAsset = function(epcisAsset) {
     	.then(() => conn.pollStatusAndFetchTransaction(txSigned.id))
 	    .then(res => {
     	    console.log(res)
-        	//console.log(API_PATH + 'transactions/' + txSigned.id )
 	        console.log('Transaction', txSigned.id, 'accepted')
     	})
 }
@@ -194,8 +193,6 @@ var processObjectEvent = function (object) {
 		allEpcidPromises.push(updateObjectEvent(asset))
 	}     	
 
-	console.log(allEpcidPromises.length)
-
 	if (allEpcidPromises.length < 50) {
 		return Promise.resolve()
 	}
@@ -279,8 +276,6 @@ var postAsset = function(channel, assetData) {
 		conn.postTransaction(txSigned)
     	//.then(() => conn.pollStatusAndFetchTransaction(txSigned.id))
 	    .then((res) => {
-    	    //console.log(res)
-        	//console.log(API_PATH + 'transactions/' + txSigned.id )
 	        console.log('Transaction', txSigned.id, 'sent')
 	        resolve(txSigned.asset)
     	})

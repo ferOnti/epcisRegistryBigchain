@@ -364,7 +364,6 @@ var postChannel = function (name, participants) {
 				mySecretKey = bs58.decode(channel.participants[i].secretKey)
 				myPublicKey = bs58.decode(channel.participants[i].publicKey)
 				myNodeName  = channel.participants[i].name
-				console.log(myNodeName, channel.participants[i].publicKey, channel.participants[i].secretKey)
 			}
 		}
 
@@ -373,27 +372,18 @@ var postChannel = function (name, participants) {
 
 				const theirPublicKey = bs58.decode(channel.participants[i].publicKey)
 				const nonce = nacl.randomBytes(24)
-				console.log('  ->',channel.participants[i].name)
-				console.log('  ->',bs58.encode(nonce))
-				console.log('  ->',bs58.encode(theirPublicKey))
-				console.log('  ->',bs58.encode(mySecretKey))
 
 				encryptedMessage = nacl.box(message, nonce, theirPublicKey, mySecretKey)
 
 				var encrypted = bs58.encode(encryptedMessage)
-				//console.log(encrypted)
 		
-			var theirSecretKey = bs58.decode("8whQGNn7PbdUbpBxQGwHPYwgNnDnhruM5LMfouCHPbm3")
-				console.log('  <-',bs58.encode(nonce))
-				console.log('  <-',bs58.encode(myPublicKey))
-				console.log('  <-',bs58.encode(theirSecretKey))
+				var theirSecretKey = bs58.decode("8whQGNn7PbdUbpBxQGwHPYwgNnDnhruM5LMfouCHPbm3")
 				var decrypted = nacl.box.open(encryptedMessage, nonce, myPublicKey, theirSecretKey)
 
 				if (decrypted != null) {
 					console.log(nacl.util.encodeUTF8(decrypted))
 				}			
 	
-				//channel.participants[i].channelEncripted = encrypted
 				var netService = require("./netService")
 				var encryptedJson = {
 					name: channel.name,
