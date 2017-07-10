@@ -367,30 +367,7 @@ var postChannel = function (name, participants) {
 				console.log(myNodeName, channel.participants[i].publicKey, channel.participants[i].secretKey)
 			}
 		}
-/*		
-  var serverKeys = serverKeysPair.keyPair
-  //serverKeys.publicKey = myPublicKey
-  //serverKeys.secretKey = mySecretKey
-  var nonce = nacl.randomBytes(24)
-  var msg = nacl.util.decodeUTF8('message to encrypt');
-	console.log('  ->',bs58.encode(nonce))
-	console.log('  ->',bs58.encode(serverKeys.publicKey))
-	console.log('  ->',bs58.encode(clientKeys.secretKey))
-  var clientBox = nacl.box(msg, nonce, serverKeys.publicKey, clientKeys.secretKey);
-	console.log('   ')
-	console.log('   -',bs58.encode(nonce))
-	console.log('   -',bs58.encode(clientKeys.publicKey))
-	console.log('   -',bs58.encode(serverKeys.secretKey))
-  var clientMsg = nacl.box.open(clientBox, nonce, clientKeys.publicKey, serverKeys.secretKey)
-  if (nacl.util.encodeUTF8(clientMsg) == nacl.util.encodeUTF8(msg)) console.log("igual 1 ", nacl.util.encodeUTF8(msg))
-  
-  //var serverBox = nacl.box(msg, nonce, clientKeys.publicKey, serverKeys.secretKey);
-  //t.equal(enc(clientBox), enc(serverBox));
-  //var serverMsg = nacl.box.open(serverBox, nonce, serverKeys.publicKey, clientKeys.secretKey);
-  //t.equal(nacl.util.encodeUTF8(serverMsg), nacl.util.encodeUTF8(msg));
 
-		console.log("   ----")
-*/
 		for (i in channel.participants) {
 			if (typeof channel.participants[i].secretKey == "undefined") {
 
@@ -469,26 +446,34 @@ var postRemoteChannel = function(name, nonce, publicKey, message) {
 
 		const thisKey = cryptoConfigService.getKeyPair()
 
-		//console.log(message)
-		//var box = nacl.util.decodeUTF8(message)
 		var box = bs58.decode(message)
 		var thisNonce = bs58.decode(nonce)
 		var theirPublicKey = bs58.decode(publicKey)
 
 		var secretKey = bs58.decode(thisKey.secretKey)
 
-		console.log( nonce)
-		console.log( publicKey)
-		console.log( bs58.encode(secretKey))
 		var decrypted = nacl.box.open(box, thisNonce, theirPublicKey, secretKey)
 
 		if (decrypted == null) {
 			reject("error opening the encrypted message")
 		} else {
-			//console.log( decrypted)
 			decryptedMessage = nacl.util.encodeUTF8(decrypted)
 			console.log( decryptedMessage)
 			resolve(decryptedMessage)
+
+			try {
+				channel = JSON.parse(decryptedMessage)
+				
+				var allChannels = cryptoConfigService.getChannels()
+				allChannels.push(channel)
+
+				//and save it in the config file
+				cryptoConfigService.setChannels(allChannels)
+				cryptoConfigService.writeConfig()
+			} catch(err) {
+				reject("encrypted message is invalid")
+			}
+
 		}
 
 	})
