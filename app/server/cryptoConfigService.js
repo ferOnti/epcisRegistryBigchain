@@ -23,9 +23,9 @@ const emptyCrytoConfig = {
 
 //todo: move compatible BigchainDB KeyPair to another files - class level
 var compatBdbKeyPair = function() {
-	var keyPair = nacl.sign.keyPair()
+	var keyPair = nacl.box.keyPair()
 	var publicKey = bs58.encode(keyPair.publicKey);
-	var secretKey = bs58.encode(keyPair.secretKey.slice(0, 32));
+	var secretKey = bs58.encode(keyPair.secretKey);
 	this.keyPair = keyPair
 	this.publicKey = publicKey
 	this.secretKey = secretKey
@@ -64,6 +64,7 @@ var init = function () {
     	config = readConfigFile(cryptoConfigFile)
 
     	if (config.secretKey.length != 44) {
+    		console.log(config.secretKey.length)
     		return reject("invalid private key")
     	}
     	if (config.publicKey.length != 44) {
@@ -120,11 +121,8 @@ var getKeyPair = function() {
 		console.error("Error, config is empty")
 		return null
 	}
-	//publicKey = bs58.decode(config.secretKey)
-	//secretKey = bs58.decode(config.secretKey)
-	//todo: build the secret key using the 44-strings saved in config file
 	keyPair = {
-		publicKey: config.secretKey,
+		publicKey: config.publicKey,
 		secretKey: config.secretKey
 	}
 
