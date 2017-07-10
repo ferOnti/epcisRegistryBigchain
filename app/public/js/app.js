@@ -400,6 +400,7 @@ function getAsset(channel) {
     var source   = $("#channelcheckbox-template").html();
     var template = Handlebars.compile(source);
     $('#channelsCheckboxList').html(template(data))
+    $('#channelsCheckboxList select').val(channel)
   })
 
 }
@@ -413,6 +414,7 @@ function createAsset(channel) {
     var source   = $("#channelcheckbox-template").html();
     var template = Handlebars.compile(source);
     $('#channels2CheckboxList').html(template(data))
+    $('#channels2CheckboxList select').val(channel)
   })
 
 }

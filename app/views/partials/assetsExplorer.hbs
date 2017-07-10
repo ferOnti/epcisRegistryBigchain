@@ -2,7 +2,7 @@
 <div class="tab-pane fade" id="tab_assets">
 
   <div class="row">
-    <div class="col-sm-8">
+    <div class="col-sm-9">
 
       <div class="panel panel-success">
         <div class="panel-heading">
@@ -11,62 +11,35 @@
 
         <div class="panel-body">
 
-          <form class="form-horizontal">
-            <div class="form-group">
-              <label class="control-label col-sm-4" for="type">Asset type:</label>
-              <div class="col-sm-8">
-                <label  class="form-control" id="type">Asset Id</label>
-              </div>
-            </div>
+            <table id="table-channels" class="table table-striped table-bordered col-sm-6">
+              <thead>
+                <tr>
+                  <th>id</th>
+                  <th>channel</th>
+                  <th>nonce</th>
+                </tr>
+              </thead>
+              <tbody>
+                \{{#each assets}}
+                <tr>
+                  <td>\{{id}}</td>
+                  <td>\{{channel}}</td>
+                  <td>\{{nonce}}</td>
+                </tr>
+                \{{/each}}
+              </tbody>
+            </table>
 
-            <div class="form-group">
-              <label class="control-label col-sm-4" for="CustomsAuthorityAddress">Customs Field:</label>
-              <div class="col-sm-8">
-                <select type="text" class="form-control" id="CustomsAuthorityAddress" value="">
-                     <option value='error'>[No account addresses registered]</option>
-                </select>
-              </div>
-            </div>
 
-
-            <br /><h3>Smart Properties</h3>
-
-            <div class="col-md-12">
-              <table class="table table-striped table-bordered" id="packingItemTable">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Serial</th>
-                    <th>SKU Number</th>
-                  </tr>
-                </thead>
-                <tbody id="packingItemTableBody">
-                </tbody>
-              </table>
-            </div>
           </div>
         </div>
     </div>
 
-    <div class="col-sm-4">
+    <div class="col-sm-3">
 
       <div class="panel panel-success">
 
         <div class="panel-body">
-            <div class="form-group">
-              <button type="button" onclick="fillWithRandomValues()" class="btn ">Random Asset</button>
-            </div>
-
-            <div class="form-group" style="display:none;">
-              <select id="thingsId" onclick="updateWithThingFromVizix()">
-              </select>
-
-              <button type="button" onclick="getThingsFromVizix()" class="btn ">Get from Vizix</button>
-            </div>
-            <div class="form-group">
-              <button type="button" onclick="deployContract()" class="btn btn-info">Create Asset</button>
-            </div>
-          </form>
 
         </div>
       </div>

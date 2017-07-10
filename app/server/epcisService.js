@@ -13,12 +13,28 @@ var allEpcidPromises = []
 //currently this is doing a text-search in mongo, 
 //this is not so exact, since we have the exact id
 
-var getAsset = function (epcid) {
+var getAsset = function (assetId, name) {
 	let conn = new BigchainDB.Connection(API_PATH)
 
+    var cryptoConfigService = require("./cryptoConfigService")
+
+   	var allChannels = cryptoConfigService.getChannels()
+
+   	var channel = null
+   	for (var i in allChannels) {
+   		if (allChannels[i].name == name) {
+   			channel = allChannels[i]
+   		}
+   	}
+	if (channel == null) {
+		reject("invalid channel name")
+		return
+	}
+
+
 	return new Promise( (resolve, reject) => {
-		console.log("  getEpcisAsset: " + epcid)
-		conn.searchAssets(epcid)
+		console.log("  getAsset: " + assetId)
+		conn.searchAssets(assetId)
 			.then( (res) => { 
 				if (res.length >=1) {
 					resolve(res[0].data)
@@ -224,55 +240,67 @@ var processLine = function(line) {
 	});
 }
 
-var postAsset = function(channel, assetData) {
-	if (typeof name == "undefined" || channel=="") {
-		reject("channel channel could not be empty string")
-		return
-	}
-
-    var cryptoService = require("./cryptoService");
-    var alice = null
-
-	var nacl = require("tweetnacl")
-	nacl.util = require('tweetnacl-util')
-	var bs58 = require('bs58');
-	var stringify = require('json-stable-stringify');
-
-	var aKey = nacl.box.keyPair()
-	var bKey = nacl.box.keyPair()
-	var message = nacl.util.decodeUTF8( stringify(assetData) )
-	var nonce   = nacl.util.decodeUTF8("123456781234567812345678")
-	var theirPublicKey = bKey.publicKey
-	var mySecretKey = aKey.secretKey
-
-	var encrypted = bs58.encode(nacl.box(message, nonce, theirPublicKey, mySecretKey))
-	//console.log(encrypted)
-
-	var encryptedAsset = {
-		channel: channel,
-		//id: assetData.id,
-		encrypted: encrypted
-	}
-
-    alice = cryptoService.getKeyPair()
-
-	// Construct a transaction payload 
-	const tx = BigchainDB.Transaction.makeCreateTransaction(
-	    encryptedAsset, //asset 
-    	assetData, //metadata
-    	[ BigchainDB.Transaction.makeOutput(
-            BigchainDB.Transaction.makeEd25519Condition(alice.publicKey))
-    	],
-    	alice.publicKey
-	)
-	// Sign the transaction with private keys 
-	const txSigned = BigchainDB.Transaction.signTransaction(tx, alice.secretKey)
-	console.log(txSigned)
-
-	// Send the transaction off to BigchainDB 
-	let conn = new BigchainDB.Connection(API_PATH)
-
+var postAsset = function(name, assetData) {
 	return new Promise( (resolve, reject) => {
+		if (typeof name == "undefined" || name=="") {
+			reject("channel name could not be empty string")
+			return
+		}
+
+	    var cryptoService = require("./cryptoService");
+	    var cryptoConfigService = require("./cryptoConfigService")
+
+	   	var allChannels = cryptoConfigService.getChannels()
+
+	   	var channel = null
+	   	for (var i in allChannels) {
+	   		if (allChannels[i].name == name) {
+	   			channel = allChannels[i]
+	   		}
+	   	}
+		if (channel == null) {
+			reject("invalid channel name")
+			return
+		}
+
+		var nacl = require("tweetnacl")
+		nacl.util = require('tweetnacl-util')
+		var bs58 = require('bs58');
+		var stringify = require('json-stable-stringify');
+
+		const channelPublicKey = bs58.decode(channel.publicKey)
+		const channelSecretKey = bs58.decode(channel.secretKey)
+		const nonce = nacl.randomBytes(24)
+		const message = nacl.util.decodeUTF8( stringify(assetData) )
+
+		const encryptedMessage = nacl.box(message, nonce, channelPublicKey, channelSecretKey)
+		const encrypted = bs58.encode(encryptedMessage)
+	
+		console.log(encrypted)
+
+		var encryptedAsset = {
+			channel: name,
+			nonce: bs58.encode(nonce),
+			encrypted: encrypted
+		}
+
+		// Construct a transaction payload 
+		const tx = BigchainDB.Transaction.makeCreateTransaction(
+		    encryptedAsset, //asset 
+	    	assetData, //metadata
+	    	[ BigchainDB.Transaction.makeOutput(
+	            BigchainDB.Transaction.makeEd25519Condition(bs58.encode(channelPublicKey)))
+	    	],
+	    	bs58.encode(channelPublicKey)
+		)
+
+		// Sign the transaction with private keys 
+		const txSigned = BigchainDB.Transaction.signTransaction(tx, bs58.encode(channelSecretKey))
+		//console.log(txSigned)
+
+		// Send the transaction off to BigchainDB 
+		let conn = new BigchainDB.Connection(API_PATH)
+
 		conn.postTransaction(txSigned)
     	//.then(() => conn.pollStatusAndFetchTransaction(txSigned.id))
 	    .then((res) => {

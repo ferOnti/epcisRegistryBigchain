@@ -62,9 +62,11 @@ function init(express, app, router) {
 
     app.get('/api/asset/:id', function (req, res) {
         var id = req.params.id
+        var channel = req.query.channel
+
         var epcisService = require("./epcisService");
-        epcisService.getAsset(id)
-            .then((stats) => { res.json(stats)} )
+        epcisService.getAsset(id, channel)
+            .then((data) => { res.json(data)} )
             .catch((message) => {
                 console.error(message)
                 res.status(400).json({error:true, message: message})
@@ -75,9 +77,11 @@ function init(express, app, router) {
     app.post('/api/asset', function (req, res) {
         var cryptoService = require("./cryptoService");
         var epcisService = require("./epcisService");
+
         var channel = req.body.channel;
         var assetDataStr = req.body.assetData;
 
+        //todo: move this validation inside epcisService.postAsset
         try {
             assetData = JSON.parse(assetDataStr)
         } catch(message) {
