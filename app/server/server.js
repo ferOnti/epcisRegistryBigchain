@@ -17,10 +17,16 @@ routes.init(express, app, router);
 
 cryptoService.init()
     .then(mongoService.connect)
-    .then(() => {
-        var epcisService  = require("./epcisService.js")
-        //epcisService.postAsset("channel1", {})
-    })
+    //.then(() => {
+    //    var epcisService  = require("./epcisService.js")
+    //    var assetData = {
+    //        "id": Math.round(Math.random()*100000),
+    //        "epcid": "urn.epcid:gtin:234322.324234",
+    //        "bizStep": "urn:cbv:shipping",
+    //        "eventDate": new Date()
+    //    }        
+    //    epcisService.postAsset("channel1", assetData)
+    //})
     .then(() =>{
         app.listen(config.app.port,function() {
             console.log("Live at Port " + config.app.port);

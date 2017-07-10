@@ -9,6 +9,7 @@ const password  = 'd77c0d46ae188164391f67b5d8eb3883';
 
 //todo: use only nacl
 var	nacl = require("tweetnacl")
+	nacl.util = require('tweetnacl-util')
 var	bs58 = require('bs58');
 
 function encrypt(text, input, output) {
@@ -237,7 +238,6 @@ var postParticipant = function (name, host, port, publicKey) {
 		}
 		
 		participants.push( {
-			id: participants.length,
 			name: name,
 			host: host,
 			port: port,
@@ -251,34 +251,56 @@ var postParticipant = function (name, host, port, publicKey) {
 
 var getEmptyChannel = function(name) {
 
+	var config = cryptoConfigService.getPublicConfig()
+
 	//the channel key used for each participant to 
 	//create and transfer assets in the channel
-	const channelKey = new Ed25519Keypair()
+	const channelKey = new cryptoConfigService.compatBdbKeyPair()
 
     //the channel hash is based in a plain text with random data
-    const salt = Math.round(Math.random()*10000000+100000)
+    const salt = bs58.encode(nacl.randomBytes(8))
     const plainChannelHash = "channel : " + name + salt
-	const channelHash = crypto.createHash('sha256').update(plainChannelHash, 'utf8').digest('hex')
-	
+	const channelHash = bs58.encode(nacl.hash(nacl.util.decodeUTF8(plainChannelHash)))
+
 	//the first participant is this server
-	var config = cryptoConfigService.getPublicConfig()
-	const partyKey = new Ed25519Keypair()
+	const firstPartyKey =  new cryptoConfigService.compatBdbKeyPair()
 
 	var firstParticipant = {
 		name: config.name,
 		server: config.host+":"+config.port,
-		publicKey:  partyKey.publicKey,
-		privateKey: partyKey.privateKey
+		publicKey: firstPartyKey.publicKey,
+		secretKey: firstPartyKey.secretKey
 	}
 
 	var channel = {
 		name: name,
-		publickey:  channelKey.publicKey,
-		privatekey: channelKey.privateKey,
+		publicKey: channelKey.publicKey,
+		secretKey: channelKey.secretKey,
 		sharedHash: channelHash,
 		sharedSecret: "sharedSecret",
 		participants: [firstParticipant]
 	}
+	return channel
+}
+
+var cloneChannel = function (original) {
+	var channel = {
+		name: original.name,
+		publicKey: original.publicKey,
+		secretKey: original.secretKey,
+		sharedHash: original.sharedHash,
+		sharedSecret: original.sharedSecret,
+		participants: []
+	}
+	for (i in original.participants) {
+		//if (typeof original.participants[i].secretKey == "undefined") {
+		var party = {}
+		party.name      = original.participants[i].name
+		party.server    = original.participants[i].server
+		party.publicKey = original.participants[i].publicKey
+		channel.participants.push(party)
+	}
+
 	return channel
 }
 
@@ -307,7 +329,7 @@ var postChannel = function (name, participants) {
 		//build the channel object to be added to the list of channels
 		var channel = getEmptyChannel(name)
 
-		//get in an array the info for each participant
+		//build in an array the info for each participant
 		allParticipants = cryptoConfigService.getParticipants()
 
 		for (i in participants) {
@@ -322,57 +344,45 @@ var postChannel = function (name, participants) {
 			}
 		}
 
-		//second iteration, calculate the sharedHash encoded for each participant with his publickey
-		//alice is this node, and bob is each participant
-		const config = cryptoConfigService.getPublicConfig()
-		//const alice = cryptoConfigService.getKey()
-		console.log("this is alice:")
-		//console.log(alice)
+		//todo: second iteration, 
+		//todo: calculate the sharedHash encoded for each participant with his publickey
 
-var nacl = require('tweetnacl');
-var naclutil = require('tweetnacl-util');
-//nacl.util = require('tweetnacl-util');
+		//clone the channel object before encrypt and send it
+		var clonedChannel = cloneChannel(channel)
 
-var enc = naclutil.encodeBase64,
-    dec = naclutil.decodeBase64;
+		//the clonedChannel is the message to be encrypted with all and each party's publicKey
+		var stringify = require('json-stable-stringify');
+		var message = nacl.util.decodeUTF8( stringify(clonedChannel) )
+	console.log(clonedChannel)
 
-	alice = nacl.box.keyPair()
-
-    //var key = dec(vec[0]);
-    //var nonce = dec(vec[1]);
-    //var msg = dec(vec[2]);
-    //var goodBox = dec(vec[3]);
-    var key = dec("givKPH4F/eDcIEUZcws1+BIWqcnx35Ul4qkA7Ilxj1c=")
-    var nonce = dec("crkCCNKADjatFscwlBoDjXw62dhwMNMp")
-    var msg = dec("")
-    var goodBox = dec("ebNFUe0iT6F8tkYMy5Cg2Q==")
-
-    var box = nacl.secretbox(msg, nonce, key);
-	console.log(box)
-
-    //t.equal(enc(box), enc(goodBox));
-    var openedBox = nacl.secretbox.open(goodBox, nonce, key);
-    t.ok(openedBox, 'box should open');
-    t.equal(enc(openedBox), enc(msg));
-    process.exit(0)
+		//get participant with the secretKey, the first participant
+		var mySecretKey = bs58.decode(channel.participants[0].secretKey)
+		var myNodeName  = ""
+		for (i in channel.participants) {
+			if (typeof channel.participants[i].secretKey != "undefined") {
+				mySecretKey = bs58.decode(channel.participants[i].secretKey)
+				myNodeName  = channel.participants[i].name
+			}
+		}
 
 		for (i in channel.participants) {
-			if (typeof channel.participants[i].privateKey == "undefined") {
+			if (typeof channel.participants[i].secretKey == "undefined") {
 
-				console.log(channel.participants[i])
-				//const bob = crypto.createECDH('secp256k1');  
-				//bob.setPublicKey (channel.participants[i].publickey, 'hex')
-				const partPublickey = channel.participants[i].publicKey
+				const theirPublicKey = bs58.decode(channel.participants[i].publicKey)
+				const nonce = nacl.randomBytes(24)
 
-				const secret  = alice.computeSecret(partPublickey, 'hex', null);
-				console.log("secret :", secret)
-
-
-				const cipher = crypto.createCipher('aes-256-ctr', secret)
-				var encrypted = cipher.update(channel.sharedHash, 'utf8', 'hex')
-	  			encrypted += cipher.final('hex');
-				console.log(encrypted)
-				channel.participants[i].channelHashEncripted = encrypted
+				var encrypted = bs58.encode(nacl.box(message, nonce, theirPublicKey, mySecretKey))
+	
+				channel.participants[i].channelEncripted = encrypted
+				var netService = require("./netService")
+				var encryptedJson = {
+					name: channel.name,
+					from: myNodeName, 
+					nonce: bs58.encode(nonce),
+					message: encrypted
+				}
+				netService.postToRemote(channel.participants[i].server, encryptedJson)
+					.then( console.log )
 			}
 		}
 
@@ -391,23 +401,58 @@ var enc = naclutil.encodeBase64,
 	})	
 }
 
+var postRemoteChannel = function(name, nonce, message) {
+	return new Promise((resolve, reject) => {
+		if (typeof name == "undefined" || name=="") {
+			reject("channel name could not be empty string")
+			return
+		}
+
+		if (typeof nonce == "undefined" || nonce=="") {
+			reject("noce could not be empty string")
+			return
+		}
+
+		if (typeof message == "undefined" || message=="") {
+			reject("message could not be empty string")
+			return
+		}
+
+		//console.log(message)
+		var box = nacl.util.decodeUTF8(message)
+		var thisNonce = bs58.decode(nonce)
+		var theirPublicKey = bs58.decode("CDpouK6B9yCbuqtoFRqwZqix2KYWVM7SYkeFLRDr7wbu")
+		var mySecretKey = bs58.decode("4T2ZjjStpRZ8rg1G5bjiwq8BYni3NnLNbwYr3wPv2J22")
+
+		console.log( theirPublicKey)
+		console.log( bs58.encode(theirPublicKey))
+		var decrypted = nacl.box.open(box, thisNonce, theirPublicKey, mySecretKey)
+
+		console.log( decrypted)
+		console.log( nacl.util.encodeUTF8(decrypted))
+
+		resolve(nacl.util.encodeUTF8(decrypted))
+	})
+
+}
 module.exports = {
-	init:            init,
-	getPublicConfig: getPublicConfig,
-	getNodeInfo:     getNodeInfo,
-    getKeyPair:      getKeyPair,
-    getPublicKey:    getPublicKey,
-    getPrivateKey:   getPrivateKey,
-    getChannels:     getChannels,
-    getChannel:      todo,
-    postChannel:     postChannel,
-    deleteChannel:   todo,
-    postRenameNode:  postRenameNode,
-    getParticipants: getParticipants,
-    getParticipant:  getParticipant,
-    postParticipant: postParticipant,
+	init:              init,
+	getPublicConfig:   getPublicConfig,
+	getNodeInfo:       getNodeInfo,
+    getKeyPair:        getKeyPair,
+    getPublicKey:      getPublicKey,
+    getPrivateKey:     getPrivateKey,
+    getChannels:       getChannels,
+    getChannel:        todo,
+    postChannel:       postChannel,
+    postRemoteChannel: postRemoteChannel,
+    deleteChannel:     todo,
+    postRenameNode:    postRenameNode,
+    getParticipants:   getParticipants,
+    getParticipant:    getParticipant,
+    postParticipant:   postParticipant,
     deleteParticipant: deleteParticipant,
-    postSignature:   postParticipantSignature
+    postSignature:     postParticipantSignature
 }
 
 

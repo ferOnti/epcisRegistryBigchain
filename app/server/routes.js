@@ -76,7 +76,15 @@ function init(express, app, router) {
         var cryptoService = require("./cryptoService");
         var epcisService = require("./epcisService");
         var channel = req.body.channel;
-        var assetData = req.body.assetData;
+        var assetDataStr = req.body.assetData;
+
+        try {
+            assetData = JSON.parse(assetDataStr)
+        } catch(message) {
+            var err = {error:true, message: message}
+            res.status(400).json(err)
+            return
+        }
 
         epcisService.postAsset(channel, assetData)
             .then((data) => { 
@@ -173,6 +181,24 @@ function init(express, app, router) {
         cryptoService.postChannel(name, participants)
             .then((data) => { 
                 console.log(data); 
+                res.json(data);
+            })
+            .catch((message) => {
+                console.error(message)
+                var err = {error:true, message: message}
+                res.status(400).json(err)
+            })        
+    });
+
+    app.post('/crypto/channel/remote', function (req, res) {
+        var cryptoService = require("./cryptoService");
+        var name    = req.body.name;
+        var nonce   = req.body.nonce;
+        var message = req.body.message;
+
+        cryptoService.postRemoteChannel(name, nonce, message)
+            .then((data) => { 
+                //console.log(data); 
                 res.json(data);
             })
             .catch((message) => {

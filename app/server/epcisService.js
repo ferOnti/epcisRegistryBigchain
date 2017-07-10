@@ -228,14 +228,11 @@ var processLine = function(line) {
 }
 
 var postAsset = function(channel, assetData) {
-/*
-	assetData = {
-		"id": Math.round(Math.random()*100000),
-		"epcid": "urn.epcid:gtin:234322.324234",
-		"bizStep": "urn:cbv:shipping",
-		"eventDate": new Date()
+	if (typeof name == "undefined" || channel=="") {
+		reject("channel channel could not be empty string")
+		return
 	}
-*/
+
     var cryptoService = require("./cryptoService");
     var alice = null
 
@@ -247,16 +244,16 @@ var postAsset = function(channel, assetData) {
 	var aKey = nacl.box.keyPair()
 	var bKey = nacl.box.keyPair()
 	var message = nacl.util.decodeUTF8( stringify(assetData) )
-	var nonce = nacl.util.decodeUTF8("123456781234567812345678")
+	var nonce   = nacl.util.decodeUTF8("123456781234567812345678")
 	var theirPublicKey = bKey.publicKey
 	var mySecretKey = aKey.secretKey
 
 	var encrypted = bs58.encode(nacl.box(message, nonce, theirPublicKey, mySecretKey))
-	console.log(encrypted)
+	//console.log(encrypted)
 
 	var encryptedAsset = {
 		channel: channel,
-		id: assetData.id,
+		//id: assetData.id,
 		encrypted: encrypted
 	}
 
@@ -277,16 +274,15 @@ var postAsset = function(channel, assetData) {
 
 	// Send the transaction off to BigchainDB 
 	let conn = new BigchainDB.Connection(API_PATH)
-   	console.log(API_PATH  )
 
 	return new Promise( (resolve, reject) => {
 		conn.postTransaction(txSigned)
-    	.then(() => conn.pollStatusAndFetchTransaction(txSigned.id))
-	    .then(res => {
-    	    console.log(res)
-        	console.log(API_PATH + 'transactions/' + txSigned.id )
-	        console.log('Transaction', txSigned.id, 'accepted')
-	        resolve(txSigned.id)
+    	//.then(() => conn.pollStatusAndFetchTransaction(txSigned.id))
+	    .then((res) => {
+    	    //console.log(res)
+        	//console.log(API_PATH + 'transactions/' + txSigned.id )
+	        console.log('Transaction', txSigned.id, 'sent')
+	        resolve(txSigned.asset)
     	})
 	})
 

@@ -21,15 +21,27 @@ const emptyCrytoConfig = {
 	channels:[]
 }
 
-var createConfigFile = function(cryptoConfigFile) {
-	config = emptyCrytoConfig
-
+//todo: move compatible BigchainDB KeyPair to another files - class level
+var compatBdbKeyPair = function() {
 	var keyPair = nacl.sign.keyPair()
 	var publicKey = bs58.encode(keyPair.publicKey);
 	var secretKey = bs58.encode(keyPair.secretKey.slice(0, 32));
+	this.keyPair = keyPair
+	this.publicKey = publicKey
+	this.secretKey = secretKey
+}
+compatBdbKeyPair.prototype.toString = function dogToString() {
+  var ret = 'KeyPair: (' + this.publicKey + ',' + this.secretKey + ')';
+  return ret;
+}
+
+var createConfigFile = function(cryptoConfigFile) {
+	config = emptyCrytoConfig
+
+	var keyPair = new compatBdbKeyPair()
 	
-	config.publicKey = publicKey
-	config.secretKey = secretKey
+	config.publicKey = keyPair.publicKey
+	config.secretKey = keyPair.secretKey
 	console.log("creating and empty crypto config file")
 	writeConfig()
     return config
@@ -169,6 +181,7 @@ var setParticipants = function(participants) {
 }
 
 module.exports = {
+	compatBdbKeyPair: compatBdbKeyPair,
 	serverKey       : serverKey,
 	channels        : channels,
 	init            : init,
