@@ -470,14 +470,16 @@ var postRemoteChannel = function(name, nonce, publicKey, message) {
 		const thisKey = cryptoConfigService.getKeyPair()
 
 		//console.log(message)
-		var box = nacl.util.decodeUTF8(message)
+		//var box = nacl.util.decodeUTF8(message)
+		var box = bs58.decode(message)
 		var thisNonce = bs58.decode(nonce)
 		var theirPublicKey = bs58.decode(publicKey)
 
 		var secretKey = bs58.decode(thisKey.secretKey)
 
-		console.log( theirPublicKey)
-		console.log( bs58.encode(theirPublicKey))
+		console.log( nonce)
+		console.log( publicKey)
+		console.log( bs58.encode(secretKey))
 		var decrypted = nacl.box.open(box, thisNonce, theirPublicKey, secretKey)
 
 		if (decrypted == null) {
