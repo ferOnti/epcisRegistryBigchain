@@ -14,10 +14,13 @@ var config = require(rootpath + '/../config.json');
 routes.init(express, app, router);
 
 //mongoService.secretTest()
-//process.exit(0)
 
 cryptoService.init()
     .then(mongoService.connect)
+    .then(() => {
+        var epcisService  = require("./epcisService.js")
+        epcisService.postAsset("channel1", {})
+    })
     .then(() =>{
         app.listen(config.app.port,function() {
             console.log("Live at Port " + config.app.port);

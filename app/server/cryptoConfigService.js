@@ -1,6 +1,9 @@
 var crypto   = require("crypto");
 var fs       = require('fs');
-var Ed25519Keypair = require('./Ed25519Keypair')
+
+//todo: use only nacl
+var	nacl = require("tweetnacl")
+var	bs58 = require('bs58');
 
 //global and exported variables
 var config    = null  //the whole config file content
@@ -12,18 +15,21 @@ const emptyCrytoConfig = {
 	name: "vizixBigchain",
 	host: "localhost",
 	port: 3000,
-	publicKey:null, 
-	privateKey: null, 
+	publicKey: null, 
+	secretKey: null, 
 	participants: [],
 	channels:[]
 }
 
 var createConfigFile = function(cryptoConfigFile) {
-	const key = new Ed25519Keypair()
 	config = emptyCrytoConfig
 
-	config.publicKey  = key.publicKey
-	config.privateKey = key.privateKey
+	var keyPair = nacl.sign.keyPair()
+	var publicKey = bs58.encode(keyPair.publicKey);
+	var secretKey = bs58.encode(keyPair.secretKey.slice(0, 32));
+	
+	config.publicKey = publicKey
+	config.secretKey = secretKey
 	console.log("creating and empty crypto config file")
 	writeConfig()
     return config
@@ -32,6 +38,7 @@ var createConfigFile = function(cryptoConfigFile) {
 var readConfigFile = function(cryptoConfigFile) {
 	var data = fs.readFileSync(cryptoConfigFile, 'utf8')
 	var config = JSON.parse(data)
+	console.log("  reading crypto config file")
 	return config
 }
 
@@ -44,7 +51,7 @@ var init = function () {
 	    //always read the config file
     	config = readConfigFile(cryptoConfigFile)
 
-    	if (config.privateKey.length != 44) {
+    	if (config.secretKey.length != 44) {
     		return reject("invalid private key")
     	}
     	if (config.publicKey.length != 44) {
@@ -83,16 +90,33 @@ var getPublicConfig = function() {
 	return result
 }
 
-var getKey = function() {
+var getKeyPair2 = function() {
 	if (config == null) {
 		console.error("Error, config is empty")
 		return null
 	}
-	const key = new Ed25519Keypair()
-	key.publicKey  = config.publicKey
-	key.privateKey = config.privateKey
+	publicKey = bs58.decode(config.secretKey)
+	secretKey = bs58.decode(config.secretKey)
+	//todo: build the secret key using the 44-strings saved in config file
+	keyPair = nacl.sign.keyPair.fromSecretKey(secretKey)
 
-   	return resultKey
+   	return keyPair
+}
+
+var getKeyPair = function() {
+	if (config == null) {
+		console.error("Error, config is empty")
+		return null
+	}
+	//publicKey = bs58.decode(config.secretKey)
+	//secretKey = bs58.decode(config.secretKey)
+	//todo: build the secret key using the 44-strings saved in config file
+	keyPair = {
+		publicKey: config.secretKey,
+		secretKey: config.secretKey
+	}
+
+   	return keyPair
 }
 
 var getChannels = function() {
@@ -150,7 +174,7 @@ module.exports = {
 	init            : init,
 	getPublicConfig : getPublicConfig,
 	writeConfig     : writeConfig,
-	getKey          : getKey,
+	getKeyPair      : getKeyPair,
 	getChannels     : getChannels,
 	setChannels     : setChannels,
 	renameNode      : renameNode,

@@ -19,6 +19,7 @@
     "sprintf": "^0.1.5",
     "sync-request": "^4.1.0",
     "tweetnacl": "^1.0.0",
+    "tweetnacl-util": "^0.15.0",
     "xmljs": "^0.3.2"
   }
 }

@@ -16,7 +16,7 @@ var connectMongoServer = function() {
 		        reject(err)
 		        process.exit(0);
 		    }
-		    console.log("Connected correctly to server");
+		    console.log("Connected correctly to server "+config.mongodb.url);
 		    mongoDB = db;
 		    resolve()
 		});
@@ -60,7 +60,12 @@ var countBigchain = function() {
 	return new Promise((resolve, reject) => {
 	    var collection = mongoDB.collection('bigchain');
     	collection.count(function(err, count) {
-        	resolve({bigchain: count}); 
+    		if (err) {
+    			console.error(err)
+    			reject(err)
+    		} else {
+        		resolve({bigchain: count}); 
+        	}
     	})
     })
 }

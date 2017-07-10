@@ -219,7 +219,6 @@ function init(express, app, router) {
     app.delete('/crypto/participant/:id', function (req, res) {
         var cryptoService = require("./cryptoService");
         var id = req.params.id
-console.log(id)
         cryptoService.deleteParticipant(id)
             .then((data) => { 
                 res.json(data);
@@ -238,7 +237,6 @@ console.log(id)
         if (signature!=null) {
             cryptoService.postSignature(signature)
                 .then((data) => { 
-                    console.log(data)
                     res.json(data);
                 })
                 .catch((message) => {

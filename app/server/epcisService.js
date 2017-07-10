@@ -84,12 +84,13 @@ var postEpcisAsset = function(epcisAsset) {
 	//console.log(txSigned)
 
 	// Send the transaction off to BigchainDB 
-	let conn = new BigchainDB.Connection(API_PATH)
+	var conn = new BigchainDB.Connection(API_PATH)
 
+	console.log(txSigned.id)
 	return conn.postTransaction(txSigned)
     	.then(() => conn.pollStatusAndFetchTransaction(txSigned.id))
 	    .then(res => {
-    	    //console.log(res)
+    	    console.log(res)
         	//console.log(API_PATH + 'transactions/' + txSigned.id )
 	        console.log('Transaction', txSigned.id, 'accepted')
     	})
@@ -227,37 +228,61 @@ var processLine = function(line) {
 }
 
 var postAsset = function(channel, assetData) {
+	assetData = {
+		"id": Math.round(Math.random()*100000),
+		"epcid": "urn.epcid:gtin:234322.324234",
+		"bizStep": "urn:cbv:shipping",
+		"eventDate": new Date()
+	}
+
     var cryptoService = require("./cryptoService");
     var alice = null
 
-    alice = cryptoService.getKey()
-	console.log(alice.getPublicKey('hex'))
-   	console.log(alice.getPrivateKey('hex'))
+	var nacl = require("tweetnacl")
+	var nacl.util = require('tweetnacl-util')
+	var bs58 = require('bs58');
+	var stringify = require('json-stable-stringify');
+
+	var aKey = nacl.box.keyPair()
+	var bKey = nacl.box.keyPair()
+	var message = nacl.util.decodeUTF8( stringify(assetData) )
+	var nonce = nacl.util.decodeUTF8("123456781234567812345678")
+	var theirPublicKey = bKey.publicKey
+	var mySecretKey = aKey.secretKey
+
+	var encrypted = bs58.encode(nacl.box(message, nonce, theirPublicKey, mySecretKey))
+	console.log(encrypted)
+
+	var encryptedAsset = {
+		id: assetData.id,
+		encrypted: encrypted
+	}
+
+    alice = cryptoService.getKeyPair()
 
 	// Construct a transaction payload 
 	const tx = BigchainDB.Transaction.makeCreateTransaction(
-	    assetData, //asset 
+	    encryptedAsset, //asset 
     	assetData, //metadata
     	[ BigchainDB.Transaction.makeOutput(
-            BigchainDB.Transaction.makeEd25519Condition(alice.getPublicKey('hex')))
+            BigchainDB.Transaction.makeEd25519Condition(alice.publicKey))
     	],
-    	alice.getPublicKey('hex'),
-    	10
+    	alice.publicKey
 	)
- 
 	// Sign the transaction with private keys 
-	const txSigned = BigchainDB.Transaction.signTransaction(tx, alice.getPrivateKey('hex'))
+	const txSigned = BigchainDB.Transaction.signTransaction(tx, alice.secretKey)
 	console.log(txSigned)
 
 	// Send the transaction off to BigchainDB 
 	let conn = new BigchainDB.Connection(API_PATH)
+   	console.log(API_PATH  )
 
 	return new Promise( (resolve, reject) => {
 		conn.postTransaction(txSigned)
     	.then(() => conn.pollStatusAndFetchTransaction(txSigned.id))
 	    .then(res => {
     	    console.log(res)
-        	//console.log(API_PATH + 'transactions/' + txSigned.id )
+        	console.log(API_PATH + 'transactions/' + txSigned.id )
 	        console.log('Transaction', txSigned.id, 'accepted')
 	        resolve(txSigned.id)
     	})

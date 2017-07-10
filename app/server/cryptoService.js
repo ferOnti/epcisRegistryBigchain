@@ -1,10 +1,15 @@
 var sprintf   = require('sprintf').sprintf;
 var crypto    = require("crypto");
 var cryptoConfigService = require("./cryptoConfigService");
+//var Ed25519Keypair = require('./Ed25519Keypair')
 
 
 const algorithm = 'aes-256-ctr';
 const password  = 'd77c0d46ae188164391f67b5d8eb3883';
+
+//todo: use only nacl
+var	nacl = require("tweetnacl")
+var	bs58 = require('bs58');
 
 function encrypt(text, input, output) {
 	if (!input ) {
@@ -69,8 +74,8 @@ var getNodeInfo = function() {
 	})
 }                
 
-var getKey = function () {
-	return cryptoConfigService.getKey()
+var getKeyPair = function () {
+	return cryptoConfigService.getKeyPair()
 }
 
 var getPublicKey = function () {
@@ -182,7 +187,7 @@ var postParticipantSignature = function (signature) {
 		}
 
     	encodedJson = decrypt(signature, 'base64', 'utf8')
-    	console.log(encodedJson)
+    	//console.log(encodedJson)
         try {
     	    plainJson = JSON.parse(encodedJson);
     	} catch(e) {
@@ -248,8 +253,6 @@ var getEmptyChannel = function(name) {
 
 	//the channel key used for each participant to 
 	//create and transfer assets in the channel
-    //x var channelKey = crypto.createECDH('secp256k1');  
-    //x channelKey.generateKeys()
 	const channelKey = new Ed25519Keypair()
 
     //the channel hash is based in a plain text with random data
@@ -259,8 +262,6 @@ var getEmptyChannel = function(name) {
 	
 	//the first participant is this server
 	var config = cryptoConfigService.getPublicConfig()
-    //x var partyKey = crypto.createECDH('secp256k1');  
-    //x partyKey.generateKeys()
 	const partyKey = new Ed25519Keypair()
 
 	var firstParticipant = {
@@ -324,20 +325,49 @@ var postChannel = function (name, participants) {
 		//second iteration, calculate the sharedHash encoded for each participant with his publickey
 		//alice is this node, and bob is each participant
 		const config = cryptoConfigService.getPublicConfig()
-		const alice = cryptoConfigService.getKey()
-		//crypto.createECDH('secp256k1');
-		//alice.setPrivateKey(config.privateKey,'hex')
-		//alice.setPublicKey (config.publicKey, 'hex')
-		console.log(alice)
+		//const alice = cryptoConfigService.getKey()
+		console.log("this is alice:")
+		//console.log(alice)
+
+var nacl = require('tweetnacl');
+var naclutil = require('tweetnacl-util');
+//nacl.util = require('tweetnacl-util');
+
+var enc = naclutil.encodeBase64,
+    dec = naclutil.decodeBase64;
+
+	alice = nacl.box.keyPair()
+
+    //var key = dec(vec[0]);
+    //var nonce = dec(vec[1]);
+    //var msg = dec(vec[2]);
+    //var goodBox = dec(vec[3]);
+    var key = dec("givKPH4F/eDcIEUZcws1+BIWqcnx35Ul4qkA7Ilxj1c=")
+    var nonce = dec("crkCCNKADjatFscwlBoDjXw62dhwMNMp")
+    var msg = dec("")
+    var goodBox = dec("ebNFUe0iT6F8tkYMy5Cg2Q==")
+
+    var box = nacl.secretbox(msg, nonce, key);
+	console.log(box)
+
+    //t.equal(enc(box), enc(goodBox));
+    var openedBox = nacl.secretbox.open(goodBox, nonce, key);
+    t.ok(openedBox, 'box should open');
+    t.equal(enc(openedBox), enc(msg));
+    process.exit(0)
 
 		for (i in channel.participants) {
-			if (typeof channel.participants[i].privatekey == "undefined") {
+			if (typeof channel.participants[i].privateKey == "undefined") {
+
 				console.log(channel.participants[i])
 				//const bob = crypto.createECDH('secp256k1');  
 				//bob.setPublicKey (channel.participants[i].publickey, 'hex')
-				const partPublickey = channel.participants[i].publickey
+				const partPublickey = channel.participants[i].publicKey
+
 				const secret  = alice.computeSecret(partPublickey, 'hex', null);
 				console.log("secret :", secret)
+
+
 				const cipher = crypto.createCipher('aes-256-ctr', secret)
 				var encrypted = cipher.update(channel.sharedHash, 'utf8', 'hex')
 	  			encrypted += cipher.final('hex');
@@ -365,7 +395,7 @@ module.exports = {
 	init:            init,
 	getPublicConfig: getPublicConfig,
 	getNodeInfo:     getNodeInfo,
-    getKey:          getKey,
+    getKeyPair:      getKeyPair,
     getPublicKey:    getPublicKey,
     getPrivateKey:   getPrivateKey,
     getChannels:     getChannels,

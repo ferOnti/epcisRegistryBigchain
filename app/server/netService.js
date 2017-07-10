@@ -20,7 +20,7 @@ var testRemoteNode = function (node, publicKey) {
 		  	});
 
 		  	response.on("end", function() {
-		    	console.log(finalData.toString());
+		    	//console.log(finalData.toString());
 		        try {
     			    dataJson = JSON.parse(finalData);
     			} catch(e) {

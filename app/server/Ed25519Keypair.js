@@ -25,7 +25,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  */
 function Ed25519Keypair(seed) {
   var keyPair = seed ? _tweetnacl2.default.sign.keyPair.fromSeed(seed) : _tweetnacl2.default.sign.keyPair();
-  console.log(this)
   this.publicKey = _bs2.default.encode(keyPair.publicKey
   // tweetnacl's generated secret key is the secret key + public key (resulting in a 64-byte buffer)
   );this.privateKey = _bs2.default.encode(keyPair.secretKey.slice(0, 32));
