@@ -33,4 +33,9 @@ cryptoService.init()
         mongoService.getBlock()
     })
     */
+    .catch((message) => {
+        //if (typeof message == "object") {
+            console.error(message)
+        //}
+    })
 
