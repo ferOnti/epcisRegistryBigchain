@@ -19,7 +19,7 @@ cryptoService.init()
     .then(mongoService.connect)
     .then(() => {
         var epcisService  = require("./epcisService.js")
-        epcisService.postAsset("channel1", {})
+        //epcisService.postAsset("channel1", {})
     })
     .then(() =>{
         app.listen(config.app.port,function() {

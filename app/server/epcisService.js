@@ -228,18 +228,19 @@ var processLine = function(line) {
 }
 
 var postAsset = function(channel, assetData) {
+/*
 	assetData = {
 		"id": Math.round(Math.random()*100000),
 		"epcid": "urn.epcid:gtin:234322.324234",
 		"bizStep": "urn:cbv:shipping",
 		"eventDate": new Date()
 	}
-
+*/
     var cryptoService = require("./cryptoService");
     var alice = null
 
 	var nacl = require("tweetnacl")
-	var nacl.util = require('tweetnacl-util')
+	nacl.util = require('tweetnacl-util')
 	var bs58 = require('bs58');
 	var stringify = require('json-stable-stringify');
 
@@ -254,6 +255,7 @@ var postAsset = function(channel, assetData) {
 	console.log(encrypted)
 
 	var encryptedAsset = {
+		channel: channel,
 		id: assetData.id,
 		encrypted: encrypted
 	}
