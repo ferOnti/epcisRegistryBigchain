@@ -9,29 +9,20 @@ const alice = new BigchainDB.Ed25519Keypair()
 
 var allEpcidPromises = []
 
-var getAsset = function (id, name) {
+var getAsset = function (id) {
 
     var cryptoConfigService = require("./cryptoConfigService")
     var mongoService = require("./mongoService")
 
-   	var allChannels = cryptoConfigService.getChannels()
-
-   	var channel = null
-   	for (var i in allChannels) {
-   		if (allChannels[i].name == name) {
-   			channel = allChannels[i]
-   		}
-   	}
-	if (channel == null) {
-		reject("invalid channel name")
-		return
-	}
-
 	return new Promise( (resolve, reject) => {
 		mongoService.getAsset(id)
 			.then((doc) => {
-			    var cryptoService = require("./cryptoService");
-				return cryptoService.openAsset(doc.data, channel)
+				if (doc == null) {
+					reject("asset with id " + id + " does not exists")
+				} else {
+			    	var cryptoService = require("./cryptoService");
+					return cryptoService.openAsset(doc.data)
+				}
 			})
 			.then((assetData) => resolve(assetData))
 			.catch((err)=>{reject(err)})

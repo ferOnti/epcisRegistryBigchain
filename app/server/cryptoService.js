@@ -475,7 +475,7 @@ var postRemoteChannel = function(name, nonce, publicKey, message) {
 
 }
 
-var openAsset = function(data, name) {
+var openAsset = function(data) {
 	return new Promise((resolve, reject) => {
 		var allChannels = cryptoConfigService.getChannels()
 		var channel = null
@@ -500,26 +500,22 @@ var openAsset = function(data, name) {
 			reject("this asset belongs to another channel, and this node is not part of it")
 		}
 
-		//const channelPublicKey = bs58.decode(channel.publicKey)
-		//const channelSecretKey = bs58.decode(channel.secretKey)
 		const channelSharedSignKey = bs58.decode(channel.sharedSignKey)
 		const nonce = bs58.decode(data.nonce)  
 		const message = bs58.decode( data.encrypted )
 		var decrypted = ""
 
-		console.log(channel.sharedSignKey)
 		decryptedMessage = nacl.secretbox.open(message, nonce, channelSharedSignKey)
 		if (decryptedMessage) {
 			decrypted = nacl.util.encodeUTF8(decryptedMessage)
 		}
-		console.log(data.encrypted)
-		console.log(decrypted)
-		assetData = data
-		assetData.nonce = data.nonce
-		//assetData.secretKey = channel.secretKey
-		//assetData.publicKey = channel.publicKey
-		assetData.sharedSignKey = channel.sharedSignKey
-		assetData.decrypted = decrypted
+
+		try {
+			assetData = JSON.parse(decrypted)
+		} catch(err) {
+			reject(err)
+		}
+
 		resolve(assetData)
 	})
 }

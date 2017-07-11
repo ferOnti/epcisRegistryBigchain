@@ -128,7 +128,6 @@ var initDialogs = function() {
   dialog4.on('show.bs.modal', function(event) {
     var modal = $(this)
     $.get("/crypto/config", function(data, status){
-      console.log(data, status)
       $("#change-node-name").val(data.name)
       $("#change-node-host").val(data.host)
       $("#change-node-port").val(data.port)
@@ -179,34 +178,27 @@ var initDialogs = function() {
   var btnGetAsset = $('#btnGetAsset')
   btnGetAsset.on('click', function(event) {
     var modal = $(this)
-    var channelName = $('#selectChannel').val()
+    //var channelName = $('#selectChannel').val()
     var assetId     = $('#assetId').val()
 
     //sanitize
     assetId = assetId.replace(/[`~!@#$%^&*()_|\-?;:'",.<>\{\}\[\]\\]/gi, '')
 
-    data = JSON.stringify({ channel: channelName, assetId: assetId })
-    url = "/api/asset/" + assetId + "?channel="+channelName
+    url = "/api/asset/" + assetId
 
     $.get(url, function(data) { 
-        console.log("get")
-        console.log(data)
         dataJson=JSON.stringify(data,null,4)
         result = hljs.highlightAuto(dataJson).value
     
         $('#asset-result').show()
         $('#asset-result').html(result)
-      })
-      .done(function(data) {
-        console.log("done")
-        console.log(data)
+        $('#getAsset-statusbar').hide()
       })
       .fail(function(error) {
         console.log(error)
         err = error.responseJSON
         $('#getAsset-statusbar').show()
         $('#getAsset-statusbar').html(err.message)
-        console.error(err)
       })
   })
 
@@ -220,7 +212,7 @@ var initDialogs = function() {
     $('#createAsset-result').hide()
     $('#createAsset-result').html("")
     $('#btnCreateAsset').show()
-    
+
     var id = Math.round(Math.random()*100000+100000);
     assetData = { 
       "assetType": "sample-asset",
@@ -347,7 +339,6 @@ function removeParticipant(nodeName) {
     //processData: false,
     //dataType: "json",
     success: function(data, status){
-      console.log(data)
        showInfoDialog("remove participant", data.message);
        reloadNodeInfo()
     },
@@ -370,7 +361,6 @@ function testConnection(node, publicKey) {
     processData: false,
     dataType: "json",
     success: function(data, status){
-      console.log(data)
        showInfoDialog("test remote connection", data.message);
     },
     error: function(error, status){
@@ -383,7 +373,7 @@ function testConnection(node, publicKey) {
 
 function getStats() {
   $.get("/api/stats", function(data, status){
-    //console.log(data);
+
     $('#totalBlocks').html(data.bigchain) 
     $('#totalVotes').html(data.votes) 
     $('#totalAssets').html(data.assets) 
@@ -397,7 +387,6 @@ function getStats() {
 
 function getAssets() {
   $.get("/api/assets", function(data, status){
-    console.log(data);
     var source   = $("#assetsList-template").html();
     var template = Handlebars.compile(source);
     $('#tbody-assets').html(template({assets:data}))
@@ -406,15 +395,14 @@ function getAssets() {
 
 function getAsset(channel) {
   $('#getAssetDialog').modal('show')
-  $('#assetChannelName').html(channel)
+  
+  //$.get("/crypto/config", function(data, status){
 
-  $.get("/crypto/config", function(data, status){
-
-    var source   = $("#channelcheckbox-template").html();
-    var template = Handlebars.compile(source);
-    $('#channelsCheckboxList').html(template(data))
-    $('#channelsCheckboxList select').val(channel)
-  })
+  //  var source   = $("#channelcheckbox-template").html();
+  //  var template = Handlebars.compile(source);
+    //$('#channelsCheckboxList').html(template(data))
+    //$('#channelsCheckboxList select').val(channel)
+  //})
 
 }
 

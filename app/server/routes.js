@@ -62,10 +62,9 @@ function init(express, app, router) {
 
     app.get('/api/asset/:id', function (req, res) {
         var id = req.params.id
-        var channel = req.query.channel
 
         var epcisService = require("./epcisService");
-        epcisService.getAsset(id, channel)
+        epcisService.getAsset(id)
             .then((data) => { res.json(data)} )
             .catch((message) => {
                 console.error(message)
