@@ -257,10 +257,13 @@ var getEmptyChannel = function(name) {
 	//create and transfer assets in the channel
 	const channelKey = new cryptoConfigService.compatBdbKeyPair()
 
+	//deprecated, the channel hash is moved to channel.sign.key
     //the channel hash is based in a plain text with random data
     const salt = bs58.encode(nacl.randomBytes(8))
     const plainChannelHash = "channel : " + name + salt
 	const channelHash = bs58.encode(nacl.hash(nacl.util.decodeUTF8(plainChannelHash)))
+
+	const channelSignKeyPar = nacl.box.keyPair()
 
 	//the first participant is this server
 	//const firstPartyKey =  new cryptoConfigService.compatBdbKeyPair()
@@ -277,8 +280,9 @@ var getEmptyChannel = function(name) {
 		name: name,
 		publicKey: channelKey.publicKey,
 		secretKey: channelKey.secretKey,
-		sharedHash: channelHash,
-		sharedSecret: "sharedSecret",
+		//sharedHash: channelHash,
+		sharedSignKey : bs58.encode(channelSignKeyPar.secretKey),
+		//sharedSecret: "sharedSecret",
 		participants: [firstParticipant]
 	}
 	return channel
@@ -289,8 +293,9 @@ var cloneChannel = function (original) {
 		name: original.name,
 		publicKey: original.publicKey,
 		secretKey: original.secretKey,
-		sharedHash: original.sharedHash,
-		sharedSecret: original.sharedSecret,
+		//sharedHash: original.sharedHash,
+		sharedSignKey: original.sharedSignKey,
+		//sharedSecret: original.sharedSecret,
 		participants: []
 	}
 	for (i in original.participants) {
@@ -377,12 +382,12 @@ var postChannel = function (name, participants) {
 
 				var encrypted = bs58.encode(encryptedMessage)
 		
-				var theirSecretKey = bs58.decode("8whQGNn7PbdUbpBxQGwHPYwgNnDnhruM5LMfouCHPbm3")
-				var decrypted = nacl.box.open(encryptedMessage, nonce, myPublicKey, theirSecretKey)
+				//var theirSecretKey = bs58.decode("8whQGNn7PbdUbpBxQGwHPYwgNnDnhruM5LMfouCHPbm3")
+				//var decrypted = nacl.box.open(encryptedMessage, nonce, myPublicKey, theirSecretKey)
 
-				if (decrypted != null) {
-					console.log(nacl.util.encodeUTF8(decrypted))
-				}			
+				//if (decrypted != null) {
+				//	console.log(nacl.util.encodeUTF8(decrypted))
+				//}			
 	
 				var netService = require("./netService")
 				var encryptedJson = {
@@ -449,10 +454,10 @@ var postRemoteChannel = function(name, nonce, publicKey, message) {
 		} else {
 			decryptedMessage = nacl.util.encodeUTF8(decrypted)
 			console.log( decryptedMessage)
-			resolve(decryptedMessage)
 
 			try {
 				channel = JSON.parse(decryptedMessage)
+				resolve(channel.name)
 				
 				var allChannels = cryptoConfigService.getChannels()
 				allChannels.push(channel)
@@ -469,6 +474,56 @@ var postRemoteChannel = function(name, nonce, publicKey, message) {
 	})
 
 }
+
+var openAsset = function(data, name) {
+	return new Promise((resolve, reject) => {
+		var allChannels = cryptoConfigService.getChannels()
+		var channel = null
+		if (typeof data.channel == "undefined") {
+			reject("this assets was not created inside a channel")
+			return
+		}
+		if (typeof data.nonce == "undefined") {
+			reject("undefined nonce in the asset")
+			return
+		}
+		if (typeof data.encrypted == "undefined") {
+			reject("undefined encrypted data in the asset")
+			return
+		}
+		for (i in allChannels) {
+			if (allChannels[i].name == data.channel) {
+				channel = allChannels[i]
+			}
+		}
+		if (channel==null) {
+			reject("this asset belongs to another channel, and this node is not part of it")
+		}
+
+		//const channelPublicKey = bs58.decode(channel.publicKey)
+		//const channelSecretKey = bs58.decode(channel.secretKey)
+		const channelSharedSignKey = bs58.decode(channel.sharedSignKey)
+		const nonce = bs58.decode(data.nonce)  
+		const message = bs58.decode( data.encrypted )
+		var decrypted = ""
+
+		console.log(channel.sharedSignKey)
+		decryptedMessage = nacl.secretbox.open(message, nonce, channelSharedSignKey)
+		if (decryptedMessage) {
+			decrypted = nacl.util.encodeUTF8(decryptedMessage)
+		}
+		console.log(data.encrypted)
+		console.log(decrypted)
+		assetData = data
+		assetData.nonce = data.nonce
+		//assetData.secretKey = channel.secretKey
+		//assetData.publicKey = channel.publicKey
+		assetData.sharedSignKey = channel.sharedSignKey
+		assetData.decrypted = decrypted
+		resolve(assetData)
+	})
+}
+
 module.exports = {
 	init:              init,
 	getPublicConfig:   getPublicConfig,
@@ -486,7 +541,8 @@ module.exports = {
     getParticipant:    getParticipant,
     postParticipant:   postParticipant,
     deleteParticipant: deleteParticipant,
-    postSignature:     postParticipantSignature
+    postSignature:     postParticipantSignature,
+    openAsset:         openAsset
 }
 
 

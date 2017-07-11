@@ -74,6 +74,20 @@ function init(express, app, router) {
 
     });
 
+    app.get('/api/assets', function (req, res) {
+        var channel = req.query.channel
+        var skip = req.query.skip
+
+        var mongoService = require("./mongoService");
+        mongoService.getAssetsList(channel, skip)
+            .then((data) => { res.json(data)} )
+            .catch((message) => {
+                console.error(message)
+                res.status(400).json({error:true, message: message})
+            })
+
+    });
+
     app.post('/api/asset', function (req, res) {
         var cryptoService = require("./cryptoService");
         var epcisService = require("./epcisService");

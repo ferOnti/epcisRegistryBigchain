@@ -224,6 +224,43 @@ var getParticipant = function(name) {
 	})
 }
 
+var getAssetsList = function(channel=null, skip=0) {
+    var collection = mongoDB.collection('assets');
+
+	return new Promise((resolve, reject) => {
+		query = {"data.assetType" : {$ne:null}}
+		if (channel) {
+			query["data.channel"] = channelHash
+		console.log(query)
+		}
+		fields= {"_id":1, "id":1, "data.channel":1, "data.assetType": 1, "data.assetId":1 }
+	    collection.find(query, fields).limit(50).skip(skip).toArray(function(err, docs) {
+		   	if (err) {
+	   			console.error(err)
+	   			reject(err)
+		   	}
+		   	resolve(docs)
+		})
+	})
+}
+
+var getAsset = function(id) {
+    var collection = mongoDB.collection('assets');
+
+	return new Promise((resolve, reject) => {
+		query = {"id" : id }
+
+	    collection.findOne(query, function(err, doc) {
+		   	if (err) {
+	   			console.error(err)
+	   			reject(err)
+		   	}
+		   	resolve(doc)
+		})
+	})
+}
+
+
 var secretTest = function() {
 	/*
     var partyA
@@ -354,8 +391,10 @@ var secretTest = function() {
 }
 
 module.exports = {
-    connect:    connectMongoServer,
-    getBlock:   getBlock,
-    getStats:   getStats,
-    secretTest: secretTest
+    connect:       connectMongoServer,
+    getBlock:      getBlock,
+    getStats:      getStats,
+    getAsset:      getAsset,
+    getAssetsList: getAssetsList,
+    secretTest:    secretTest
 }

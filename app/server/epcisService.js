@@ -9,14 +9,10 @@ const alice = new BigchainDB.Ed25519Keypair()
 
 var allEpcidPromises = []
 
-//todo: change the way to search an asset id
-//currently this is doing a text-search in mongo, 
-//this is not so exact, since we have the exact id
-
-var getAsset = function (assetId, name) {
-	let conn = new BigchainDB.Connection(API_PATH)
+var getAsset = function (id, name) {
 
     var cryptoConfigService = require("./cryptoConfigService")
+    var mongoService = require("./mongoService")
 
    	var allChannels = cryptoConfigService.getChannels()
 
@@ -31,17 +27,14 @@ var getAsset = function (assetId, name) {
 		return
 	}
 
-
 	return new Promise( (resolve, reject) => {
-		console.log("  getAsset: " + assetId)
-		conn.searchAssets(assetId)
-			.then( (res) => { 
-				if (res.length >=1) {
-					resolve(res[0].data)
-				} else {
-					resolve(res)
-				}
-			} )
+		mongoService.getAsset(id)
+			.then((doc) => {
+			    var cryptoService = require("./cryptoService");
+				return cryptoService.openAsset(doc.data, channel)
+			})
+			.then((assetData) => resolve(assetData))
+			.catch((err)=>{reject(err)})
 	})
 
 }
@@ -270,17 +263,24 @@ var postAsset = function(name, assetData) {
 
 		const channelPublicKey = bs58.decode(channel.publicKey)
 		const channelSecretKey = bs58.decode(channel.secretKey)
+
+		const channelSharedSignKey = bs58.decode(channel.sharedSignKey)
 		const nonce = nacl.randomBytes(24)
 		const message = nacl.util.decodeUTF8( stringify(assetData) )
 
-		const encryptedMessage = nacl.box(message, nonce, channelPublicKey, channelSecretKey)
+
+		const encryptedMessage = nacl.secretbox(message, nonce, channelSharedSignKey)
+		//const encryptedMessage = nacl.box(message, nonce, channelPublicKey, channelSecretKey)
 		const encrypted = bs58.encode(encryptedMessage)
 	
-		console.log(encrypted)
+		assetId = assetData.id ? assetData.id : bs58.encode(nacl.randomBytes(8))
+		assetType = assetData.assetType ? assetData.assetType : 'generic'
 
 		var encryptedAsset = {
 			channel: name,
-			nonce: bs58.encode(nonce),
+			assetType: assetType,
+			assetId: assetId,
+			nonce:   bs58.encode(nonce),
 			encrypted: encrypted
 		}
 
@@ -305,7 +305,7 @@ var postAsset = function(name, assetData) {
     	//.then(() => conn.pollStatusAndFetchTransaction(txSigned.id))
 	    .then((res) => {
 	        console.log('Transaction', txSigned.id, 'sent')
-	        resolve(txSigned.asset)
+	        resolve({id:txSigned.id, data: encrypted})
     	})
 	})
 

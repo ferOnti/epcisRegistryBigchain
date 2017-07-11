@@ -219,10 +219,13 @@ var initDialogs = function() {
     $('#createAsset-statusbar').html("")
     $('#createAsset-result').hide()
     $('#createAsset-result').html("")
-
+    $('#btnCreateAsset').show()
+    
+    var id = Math.round(Math.random()*100000+100000);
     assetData = { 
-      type: "sample-asset",
-      "name": "asset " + Math.round(Math.random()*10000+1000),
+      "assetType": "sample-asset",
+      "id": id,
+      "name": "asset " + id,
       "date" : new Date().toISOString()
     }
     $('#assetData').html(JSON.stringify(assetData, null, 4))
@@ -233,6 +236,7 @@ var initDialogs = function() {
     var modal = $(this)
     var channelName = $('#selectChannel').val()
     var assetData     = $('#assetData').val()
+    $('#btnCreateAsset').hide()
 
     data = JSON.stringify({ channel: channelName, assetData: assetData })
     
@@ -391,6 +395,15 @@ function getStats() {
   });
 }
 
+function getAssets() {
+  $.get("/api/assets", function(data, status){
+    console.log(data);
+    var source   = $("#assetsList-template").html();
+    var template = Handlebars.compile(source);
+    $('#tbody-assets').html(template({assets:data}))
+  });
+}
+
 function getAsset(channel) {
   $('#getAssetDialog').modal('show')
   $('#assetChannelName').html(channel)
@@ -427,6 +440,7 @@ window.onload = function() {
 
   reloadNodeInfo();
   getStats();
+  getAssets();
 
   setInterval(getStats, 4000)
 
