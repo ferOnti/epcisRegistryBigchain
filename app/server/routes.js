@@ -31,11 +31,15 @@ function init(express, app, router) {
 
     app.use(express.static(publicPath));
 
+    var xmlparser = require('express-xml-bodyparser');
+
     var bodyParser = require('body-parser')
     app.use( bodyParser.json() );       // to support JSON-encoded bodies
     app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
         extended: true
     }));
+    app.use(xmlparser());
+
 
     //logging
     app.use(function (req, res, next) {
@@ -115,6 +119,22 @@ function init(express, app, router) {
                 var err = {error:true, message: message}
                 res.status(400).json(err)
             })
+    });
+
+    app.post('/api/epcis/event', function (req, res) {
+        var epcisService = require("./epcisService");
+        epcisService.postEpcisEvent(req.headers.channel, req.body)
+            .then((data) => { 
+                res.json(data);
+            })
+            .catch((message) => {
+                if (typeof message == "object") {
+                    console.error(message)
+                }
+                var err = {error:true, message: message}
+                res.status(400).json(err)
+            })
+            
     });
 
     //crypto api

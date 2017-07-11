@@ -13,6 +13,7 @@
     "bs58": "^4.0.1",
     "express": "latest",
     "express-handlebars": "^3.0.0",
+    "express-xml-bodyparser": "^0.3.0",
     "line-by-line": "^0.1.5",
     "mongodb": "latest",
     "rootpath": "latest",

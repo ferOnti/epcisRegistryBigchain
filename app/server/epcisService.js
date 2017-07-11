@@ -224,6 +224,66 @@ var processLine = function(line) {
 	});
 }
 
+var postEpcisEvent = function(channel, epcisEvent) {
+	return new Promise( (resolve, reject) => {
+		if (typeof channel == "undefined" || channel == null) {
+			reject("channel name could not be empty string")
+			return
+		}
+		var asset = {}
+		if (typeof epcisEvent.objectevent != "undefined" ) {
+			var obj = epcisEvent.objectevent
+			if (obj.eventtime && obj.eventtime.length >0) {
+				asset.eventTime = obj.eventtime[0]
+			}
+			if (obj.recordtime && obj.recordtime.length >0) {
+				asset.recordTime = obj.recordtime[0]
+			}
+			if (obj.eventtimezoneoffset && obj.eventtimezoneoffset.length >0) {
+				asset.eventTimeZoneOffset = obj.eventtimezoneoffset[0]
+			}
+			if (obj.baseextension && obj.baseextension.length >0) {
+				eventid = obj.baseextension[0].eventid
+				asset.eventId = eventid[0]
+			}
+			if (obj.epclist && obj.epclist.length >0) {
+				epclist = obj.epclist[0]
+				asset.epcList = epclist.epc
+			}
+			if (obj.action && obj.action.length >0) {
+				asset.action = obj.action[0]
+			}
+			if (obj.disposition && obj.disposition.length >0) {
+				asset.disposition = obj.disposition[0]
+			}
+			if (obj.readpoint && obj.readpoint.length >0) {
+				readpoint = obj.readpoint[0]
+				asset.readpoint = readpoint.id[0]
+			}
+			if (obj.bizlocation && obj.bizlocation.length >0) {
+				bizlocation = obj.bizlocation[0]
+				asset.bizlocation = bizlocation.id[0]
+			}
+			//todo: 
+			// - bizTransaction
+			// - thingList
+			if (obj['vizix:thinglist'] && obj['vizix:thinglist'].length >0) {
+				thinglist = obj['vizix:thinglist'][0]
+				thing = thinglist['vizix:thing'][0]
+				//console.log(thing)
+				//asset.thinglist = thinglist
+			}
+		}
+
+		if (asset == {}) {
+			reject ("empty event")
+		}
+		postAsset(channel, asset)
+			.then( (res) => { resolve(res)})
+			.catch( (err) => { reject(err)})
+	})
+}
+
 var postAsset = function(name, assetData) {
 	return new Promise( (resolve, reject) => {
 		if (typeof name == "undefined" || name=="") {
@@ -298,6 +358,7 @@ var postAsset = function(name, assetData) {
 	        console.log('Transaction', txSigned.id, 'sent')
 	        resolve({id:txSigned.id, data: encrypted})
     	})
+    	.catch((err) => {reject(err)})
 	})
 
 }
@@ -307,6 +368,7 @@ module.exports.getEpcisAsset      = getEpcisAsset
 module.exports.processObjectEvent = processObjectEvent
 module.exports.postEpcisAsset     = postEpcisAsset
 module.exports.postAsset          = postAsset
+module.exports.postEpcisEvent     = postEpcisEvent
 module.exports.processLine        = processLine
 module.exports.getTransaction     = getTransaction
 
