@@ -199,22 +199,9 @@ BlCharts.init = (function() {
 
     var ctxTransactions   = $("#chartTransactions");
     var ctxBlockRate      = $("#chartBlockRate");
-/*
-    var ctxDifficult = $("#chartDifficult");
-    var ctxDuration  = $("#chartDuration");
-    var ctxSize      = $("#chartSize");
-    var ctxTxs       = $("#chartTxs");
-    var ctxGasLimit  = $("#chartGasLimit");
-*/
+
     BlCharts.chartTransactions   = new Chart (ctxTransactions,   {type:'line', data: data1, options:options});
     BlCharts.chartBlockRate      = new Chart (ctxBlockRate,      {type:'line', data: data2, options:options});
-/*
-    BlCharts.chartDuration  = new Chart (ctxDuration,  {type:'line', data: data3, options:options});
-    BlCharts.chartSize      = new Chart (ctxSize,      {type:'line', data: data4, options:options});
-    BlCharts.chartTxs       = new Chart (ctxTxs,       {type:'line', data: data5, options:options});
-    BlCharts.chartGasLimit  = new Chart (ctxGasLimit,  {type:'line', data: data6, options:options});
-*/
-    //ctxGasUsed[0].width = $("#chartGasUsedDiv").width
 
 })
 
@@ -223,15 +210,9 @@ BlCharts.update = (function(data, totalBlocks) {
     var dataTransactions = []
 
     //count transactions per block
-    for (var i=0; i< data.length ; i++) {
-        var timestamp = new Date(data[data.length-i-1].timestamp*1000)
-        var min = timestamp.getMinutes()
-        var sec = timestamp.getSeconds()
-        var x = (min>9?min:'0'+min) +':'+ (sec>9?sec:'0'+sec) 
-
-        labelsTransactions.push (x);
-
-        dataTransactions.push     (data[data.length-i-1].transactions);
+    for (var i=data.length -1; i>=0; i--) {
+        labelsTransactions.push (totalBlocks-i)
+        dataTransactions.push     (data[i].transactions);
     }
     BlCharts.chartTransactions.data.labels = labelsTransactions;
     BlCharts.chartTransactions.data.datasets[0].data = dataTransactions;
@@ -243,10 +224,10 @@ BlCharts.update = (function(data, totalBlocks) {
     var startTime = data[data.length-1]
     var prevTime = data[data.length-1]
     for (var i=data.length -2; i>=0; i--) {
-        var timestamp = new Date(data[i].timestamp*1000)
-        var min = timestamp.getMinutes()
-        var sec = timestamp.getSeconds()
-        var x = (min>9?min:'0'+min) +':'+ (sec>9?sec:'0'+sec) 
+        //var timestamp = new Date(data[i].timestamp*1000)
+        //var min = timestamp.getMinutes()
+        //var sec = timestamp.getSeconds()
+        //var x = (min>9?min:'0'+min) +':'+ (sec>9?sec:'0'+sec) 
         labelsBlockRate.push (totalBlocks-i)
 
         var elapsed = data[i].timestamp - prevTime
