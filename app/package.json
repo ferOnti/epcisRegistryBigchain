@@ -8,7 +8,7 @@
     "start": "node server.js 2>/dev/null"
   },
   "dependencies": {
-    "bigchaindb-driver": "^0.2.0",
+    "bigchaindb-driver": "^0.3.0",
     "body-parser": "latest",
     "bs58": "^4.0.1",
     "express": "latest",
