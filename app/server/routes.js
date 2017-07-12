@@ -137,6 +137,18 @@ function init(express, app, router) {
             
     });
 
+    app.get('/api/blocks', function (req, res) {
+        var mongoService = require("./mongoService");
+        mongoService.getBlockTimeList()
+            .then((data) => { res.json(data)} )
+            .catch((message) => {
+                console.error(message)
+                res.status(400).json({error:true, message: message})
+            })
+
+    });
+
+
     //crypto api
     app.get('/crypto/config', function (req, res) {
         var cryptoService = require("./cryptoService");

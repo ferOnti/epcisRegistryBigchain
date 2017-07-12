@@ -260,6 +260,36 @@ var getAsset = function(id) {
 	})
 }
 
+var getBlockTimeList = function() {
+    var collection = mongoDB.collection('bigchain');
+
+	return new Promise((resolve, reject) => {
+		var pipeline = [
+		      {
+		         "$project": {
+		             "_id" : 0,
+		            "voters": { "$size": "$block.voters" },
+		            "transactions": { "$size": "$block.transactions" },
+		            "timestamp" : "$block.timestamp"
+		         }
+		      }, 
+		      {"$sort": {"timestamp": -1}}, 
+		      {"$limit": 40}
+		   ]
+
+	    collection.aggregate(pipeline, function(err, docs) {
+		   	if (err) {
+	   			console.error(err)
+	   			reject(err)
+		   	}
+		   	resolve(docs)
+		})
+	})
+
+db.bigchain.aggregate(
+)
+
+}
 
 var secretTest = function() {
 	/*
@@ -396,5 +426,6 @@ module.exports = {
     getStats:      getStats,
     getAsset:      getAsset,
     getAssetsList: getAssetsList,
+    getBlockTimeList: getBlockTimeList,
     secretTest:    secretTest
 }

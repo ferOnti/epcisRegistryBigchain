@@ -374,6 +374,7 @@ function testConnection(node, publicKey) {
 function getStats() {
   $.get("/api/stats", function(data, status){
 
+    totalBlocks = data.bigchain
     $('#totalBlocks').html(data.bigchain) 
     $('#totalVotes').html(data.votes) 
     $('#totalAssets').html(data.assets) 
@@ -382,6 +383,11 @@ function getStats() {
     $('#totalTransfer').html(data.txs.transfer) 
     $('#totalGenesis').html(data.txs.genesis) 
     $('#totalBacklog').html(data.backlog) 
+
+    $.get("/api/blocks", function(data){
+      BlCharts.update(data, totalBlocks);
+    })
+
   });
 }
 
@@ -432,7 +438,10 @@ window.onload = function() {
 
   setInterval(getStats, 4000)
 
-  //$('.navbar-nav a[href="#tab_blocks"]').tab('show')
-  $('.navbar-nav a[href="#tab_participants"]').tab('show')
+  BlCharts.init();
+
+
+  $('.navbar-nav a[href="#tab_blocks"]').tab('show')
+  //$('.navbar-nav a[href="#tab_participants"]').tab('show')
 
 }

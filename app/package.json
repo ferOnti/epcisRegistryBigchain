@@ -15,6 +15,7 @@
     "express-handlebars": "^3.0.0",
     "express-xml-bodyparser": "^0.3.0",
     "line-by-line": "^0.1.5",
+    "moment": "^2.18.1",
     "mongodb": "latest",
     "rootpath": "latest",
     "sprintf": "^0.1.5",
