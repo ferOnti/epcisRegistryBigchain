@@ -9,6 +9,10 @@ const alice = new BigchainDB.Ed25519Keypair()
 
 var allEpcidPromises = []
 
+/*
+	get an asset from database, and then try to open
+	check every channel this node have access and try to open the asset
+*/
 var getAsset = function (id) {
 
     var cryptoConfigService = require("./cryptoConfigService")
@@ -30,6 +34,7 @@ var getAsset = function (id) {
 
 }
 
+//deprecated, since search is not so good
 var getEpcisAsset = function (epcid) {
 	let conn = new BigchainDB.Connection(API_PATH)
 
@@ -224,6 +229,10 @@ var processLine = function(line) {
 	});
 }
 
+/*
+	save an epcis event
+	this is a preliminar version, just to txAsset
+*/
 var postEpcisEvent = function(channel, epcisEvent) {
 	return new Promise( (resolve, reject) => {
 		if (typeof channel == "undefined" || channel == null) {
@@ -283,6 +292,11 @@ var postEpcisEvent = function(channel, epcisEvent) {
 			.catch( (err) => { reject(err)})
 	})
 }
+
+/* 
+	save the asset in the specified channel
+	name is the channel name
+*/
 
 var postAsset = function(name, assetData) {
 	return new Promise( (resolve, reject) => {

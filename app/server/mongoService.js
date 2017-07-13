@@ -83,6 +83,7 @@ var countBacklog = function() {
 	return new Promise((resolve, reject) => {
 	    var collection = mongoDB.collection('backlog');
     	collection.count(function(err, count) {
+    		console.log(err, count)
         	resolve({backlog: count}); 
     	})
     })
@@ -202,6 +203,8 @@ var getStats = function() {
 					stats[row] = res[i][row]
 				}
 			}
+    		console.log(stats)
+
 			resolve(stats)
 		}, function(err) {
 			console.error(err)
