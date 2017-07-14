@@ -1,0 +1,19 @@
+package epcis;
+syntax = "proto3";
+ 
+import "epcis.proto";
+
+message TransactionEvent {
+    required string event_time  = 1; 
+    optional string record_time = 2; 
+    string event_time_zone_offset = 3  [default = "-04:00"]; 
+    optional string event_id = 4; 
+    required string parent_id = 5; 
+    repeated string epc_list = 6; 
+	optional ActionEnum action = 7 [default = ADD];
+	optional string biz_step = 8;
+	optional string disposition = 9;
+	optional string read_point = 10;
+	optional string biz_location = 11;
+	repeated BizTransaction biz_transactions = 12;
+}

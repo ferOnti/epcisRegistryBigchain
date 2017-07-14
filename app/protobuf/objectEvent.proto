@@ -1,0 +1,25 @@
+package epcis;
+syntax = "proto3";
+ 
+import "epcis.proto";
+
+message ObjectEvent {
+    required string event_time  = 1; // becomes eventTime
+    optional string record_time = 2; // becomes recordTime
+    string event_time_zone_offset = 3  [default = "-04:00"]; // becomes eventTimeZoneOffset
+    optional BaseExtension baseExtension = 4; 
+    repeated EpcList epc_list = 5; 
+
+	optional ActionEnum action = 6 [default = OBSERVE];    
+	optional string biz_step = 7;
+	optional string disposition = 8;
+	repeated ReadPoint read_point = 9;
+	repeated BizLocation biz_location = 10;
+	repeated BizTransaction biz_transactions = 11;
+	repeated SourceList source_list = 12;
+	repeated DestinationList destination_list = 13;
+	optional Extension extension = 14;
+	optional ThingList thing_list = 40;
+
+
+}

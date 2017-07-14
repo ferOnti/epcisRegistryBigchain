@@ -1,0 +1,83 @@
+package epcis;
+syntax = "proto3";
+ 
+//action 
+enum ActionEnum {
+	ADD = 0;
+	OBSERVE = 1;
+	DELETE = 2;
+}
+
+//bizTransaction
+message BizTransaction {
+	required string type = 1;
+	required string id = 2;
+}
+
+//QuantityList
+message QuantityElement {
+	required string epcClass = 1;
+	required double quantity = 2;
+}
+
+message QuantityList {
+	repeated QuantityElement quantity_element = 1;
+}
+
+//ilmd
+message Imld {
+	optional string value = 1;
+}
+
+//extension
+message Extension {
+	repeated QuantityList quantity_list = 1;
+	repeated QuantityList child_quantity_list = 2;
+	repeated Ilmd ilmd = 3;
+}
+
+//baseExtension for eventId
+message BaseExtension {
+	required string event_id = 1;
+}
+
+message EpcList {
+	required string epc = 1;
+}
+
+//readPoint
+message ReadPoint {
+	required string id = 1 ;
+}
+
+//bizLocation
+message BizLocation {
+	required string id = 1 ;
+}
+
+//Source Destination
+message SourceList {
+	required string type = 1;
+	required string id = 2;
+}
+
+message DestinationList {
+	required string type = 1;
+	required string id = 2;
+}
+
+
+/* vizix extendend type */
+message ThingField {
+	required string name = 1;
+	required string value = 2;
+}
+
+message Thing {
+	required string epcid = 1;
+	optional ThingField thing_field = 2;
+}
+
+message ThingList {
+	repeated Thing thing = 1;
+}

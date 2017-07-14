@@ -1,0 +1,8 @@
+// awesome.proto
+package awesomepackage;
+syntax = "proto3";
+ 
+import "epcis.proto";
+import "objectEvent.proto";
+import "aggregationEvent.proto";
+import "transactionEvent.proto";
