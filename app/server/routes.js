@@ -1,6 +1,17 @@
 
 var mongoDB = null;
 var exphbs = require('express-handlebars');
+const WebSocket = require('ws');
+const express = require("express");
+const app = express();
+const router = express.Router();
+
+const http = require('http');
+const url = require('url');
+
+var wsService = require ("./wsService")
+var server = http.createServer(app);
+var wss = new WebSocket.Server({ server });
 
 function returnError(res, message) {
     if (typeof message == "object") {
@@ -12,7 +23,7 @@ function returnError(res, message) {
     }
 }
 
-function init(express, app, router) {
+function init(webPort, websocketPort) {
     var path = rootpath + '/views/';
     var publicPath = rootpath + '/public';
 
@@ -146,6 +157,25 @@ function init(express, app, router) {
                 res.status(400).json({error:true, message: message})
             })
 
+    });
+
+    app.post('/api/stress/start', function (req, res) {
+        var wsService = require("./wsService"); //todo: move stress test to another service?
+        var stressTotal   = req.body.stressTotal;
+        var stressBetween = req.body.stressBetween;
+
+        wsService.testStart(stressTotal, stressBetween)
+            .then((data) => { 
+                res.json(data);
+            })
+            .catch((message) => {
+                if (typeof message == "object") {
+                    console.error(message)
+                }
+                var err = {error:true, message: message}
+                res.status(400).json(err)
+            })
+            
     });
 
 
@@ -349,7 +379,70 @@ function init(express, app, router) {
         console.log("    404:" );
         res.sendFile(path + "404.html");
     });
+    app.listen(webPort, function() {
+        console.log("Live at Port " + webPort);
+    })
 
+    //websocket server
+    //todo: move to wsService 
+    //const server = http.createServer(app);
+    //const wss = new WebSocket.Server({ server });
+
+    // Broadcast to all. 
+    wss.broadcast = function broadcast(data) {
+        console.log(wss.clients)
+        wss.clients.forEach(function each(client) {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(data);
+            }
+        });
+    };
+    wsService.setWss(wss)
+
+    wss.on('connection', function connection(ws, req) {
+        const location = url.parse(req.url, true);
+
+        const ip = req.connection.remoteAddress
+        const query = location.query
+        const pathname = location.pathname
+
+        ws.on('message', function incoming(message) {
+            try {
+                command = JSON.parse(message)
+                if (typeof command.action != "undefined") {
+                    wsDispatch(wss, ws, req, command)
+                }
+            } catch (err) { console.error(err)}
+        });
+    
+        ws.send('{"message":"connected from ' + ip + '"}', function ack(err) {
+            if (err) {
+                console.error(err)
+            }
+        });
+    });
+ 
+    server.listen(websocketPort, function listening() {
+        console.log('websocket open on %d', server.address().port);
+    });
+
+}
+
+var wsDispatch = function(wss, ws, req, command) {
+    //var wsService = require ("./wsService")
+
+    //wsService.wss = wss
+    wsService.ws = ws
+    wsService.req = req
+
+    switch(command.action) {
+        case "test-status" : wsService.testStatus()
+            break
+        case "start-test" : wsService.startTest(command)
+            break;
+        default:
+            console.log("error command not defined " + command)    
+    }
 }
 
 module.exports = {

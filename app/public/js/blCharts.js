@@ -3,6 +3,7 @@
 var BlCharts = {};
 
 BlCharts.chartTransactions  = null;
+BlCharts.chartBlockTime     = null;
 BlCharts.chartBlockRate     = null;
 
 
@@ -55,7 +56,6 @@ BlCharts.init = (function() {
             {
                 label: "block time",
                 fill: 'bottom',
-                //lineTension: 0.1,
                 backgroundColor: "rgba(75,192,192,0.4)",
                 borderColor: "rgba(75,192,192,1)",
                 borderCapStyle: 'butt',
@@ -82,9 +82,8 @@ BlCharts.init = (function() {
         labels: [],
         datasets: [
             {
-                label: "duration",
+                label: "block rate",
                 fill: "bottom",
-                //lineTension: 0.1,
                 stepped: true,
                 backgroundColor: "rgba(54, 162, 235, 0.2)",
                 borderColor: "rgba(54, 162, 235, 1)",
@@ -198,10 +197,12 @@ BlCharts.init = (function() {
 
 
     var ctxTransactions   = $("#chartTransactions");
+    var ctxBlockTime      = $("#chartBlockTime");
     var ctxBlockRate      = $("#chartBlockRate");
 
     BlCharts.chartTransactions   = new Chart (ctxTransactions,   {type:'line', data: data1, options:options});
-    BlCharts.chartBlockRate      = new Chart (ctxBlockRate,      {type:'line', data: data2, options:options});
+    BlCharts.chartBlockTime      = new Chart (ctxBlockTime,      {type:'line', data: data2, options:options});
+    BlCharts.chartBlockRate      = new Chart (ctxBlockRate,      {type:'line', data: data3, options:options});
 
 })
 
@@ -219,8 +220,8 @@ BlCharts.update = (function(data, totalBlocks) {
     BlCharts.chartTransactions.update(0);
 
     //calculate block time for this data
-    var labelsBlockRate = [];
-    var dataBlockRate = []
+    var labelsBlockTime = [];
+    var dataBlockTime = []
     var startTime = data[data.length-1]
     var prevTime = data[data.length-1]
     for (var i=data.length -2; i>=0; i--) {
@@ -228,6 +229,24 @@ BlCharts.update = (function(data, totalBlocks) {
         //var min = timestamp.getMinutes()
         //var sec = timestamp.getSeconds()
         //var x = (min>9?min:'0'+min) +':'+ (sec>9?sec:'0'+sec) 
+        labelsBlockTime.push (totalBlocks-i)
+
+        var elapsed = data[i].timestamp - prevTime
+        if (elapsed>300) {elapsed = 0}
+        prevTime = data[i].timestamp
+
+        dataBlockTime.push (elapsed);
+    }
+    BlCharts.chartBlockTime.data.labels = labelsBlockTime;
+    BlCharts.chartBlockTime.data.datasets[0].data = dataBlockTime;
+    BlCharts.chartBlockTime.update(0);
+
+    //calculate block rate for this data
+    var labelsBlockRate = [];
+    var dataBlockRate = []
+    var startTime = data[data.length-1]
+    var prevTime = data[data.length-20]
+    for (var i=data.length -1 -20; i>=0; i--) {
         labelsBlockRate.push (totalBlocks-i)
 
         var elapsed = data[i].timestamp - prevTime

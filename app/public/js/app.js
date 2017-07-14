@@ -255,7 +255,47 @@ var initDialogs = function() {
     });
 
   })
-}
+
+//general buttons
+
+  var btnStressStart = $('#btnStressStart')
+  btnStressStart.on('click', function(event) {
+    var stressTotal   = $('#stressTotal').val()
+    var stressBetween = $('#stressBetween').val()
+    $('#btnStressStart').hide()
+    $('#btnStressStop').hide()
+    $('#stress-statusbar').hide()
+    $('#stress-statusbar').html("")
+
+    data = JSON.stringify({ stressTotal: stressTotal, stressBetween: stressBetween })
+    
+    $.ajax({
+      url: "/api/stress/start",
+      method: "POST",
+      data: data,
+      contentType: "application/json",
+      processData: false,
+      dataType: "json",
+      success: function(data, status){
+        //dataJson=JSON.stringify(data,null,4)
+        //result = hljs.highlightAuto(dataJson).value
+    
+        //$('#createAsset-result').show()
+        //$('#createAsset-result').html(result)
+      },
+      error: function(error, status){
+        err = error.responseJSON
+        $('#stress-statusbar').show()
+        $('#stress-statusbar').html(err.message)
+        console.error(err)
+      }
+    });
+
+  })
+
+} //initDialogs (and buttons)
+
+
 
 var appendContractAddressToList_seen = {};
 function appendContractAddressToList(contractAddress)
@@ -439,7 +479,7 @@ window.onload = function() {
   setInterval(getStats, 4000)
 
   BlCharts.init();
-
+  ChainWebSocket.initialize()
 
   $('.navbar-nav a[href="#tab_blocks"]').tab('show')
   //$('.navbar-nav a[href="#tab_participants"]').tab('show')

@@ -14,14 +14,16 @@
     "express": "latest",
     "express-handlebars": "^3.0.0",
     "express-xml-bodyparser": "^0.3.0",
+    "http-websocket-server": "0.2.1",
     "line-by-line": "^0.1.5",
-    "moment": "^2.18.1",
     "mongodb": "latest",
+    "protobufjs": "^6.8.0",
     "rootpath": "latest",
     "sprintf": "^0.1.5",
     "sync-request": "^4.1.0",
     "tweetnacl": "^1.0.0",
     "tweetnacl-util": "^0.15.0",
+    "ws": "^3.0.0",
     "xmljs": "^0.3.2"
   }
 }
