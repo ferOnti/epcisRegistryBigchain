@@ -14,7 +14,7 @@ routes.init(config.app.port, config.app.websocket);
 cryptoService.init()
     .then(mongoService.connect)
     .then(() => {
-    /*
+    
     var protobuf = require("protobufjs");
         protobuf.load("protobuf/all.proto", function(err, root) {
         if (err) {
@@ -71,7 +71,8 @@ cryptoService.init()
  
         console.log("-----------")
     });
-    */
+    
+    
     //    var epcisService  = require("./epcisService.js")
     //    var assetData = {
     //        "id": Math.round(Math.random()*100000),

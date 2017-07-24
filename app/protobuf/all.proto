@@ -1,8 +1,9 @@
-// awesome.proto
-package awesomepackage;
+// all epcis .proto file
+package epcis;
 syntax = "proto3";
  
 import "epcis.proto";
 import "objectEvent.proto";
 import "aggregationEvent.proto";
 import "transactionEvent.proto";
+import "transformationEvent.proto";

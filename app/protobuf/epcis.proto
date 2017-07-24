@@ -41,6 +41,7 @@ message BaseExtension {
 	required string event_id = 1;
 }
 
+//epc item from EcpList
 message EpcList {
 	required string epc = 1;
 }

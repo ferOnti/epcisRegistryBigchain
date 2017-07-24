@@ -1,0 +1,24 @@
+package epcis;
+syntax = "proto3";
+ 
+import "epcis.proto";
+
+message TransformationEvent {
+    required string event_time  = 1; 
+    optional string record_time = 2; 
+    string event_time_zone_offset = 3  [default = "-04:00"]; 
+    optional BaseExtension baseExtension = 4; 
+    repeated EpcList inputEPCList = 5; 
+    repeated QuantityList inputQuantityList = 6;
+    repeated EpcList outputEPCList = 7; 
+    repeated QuantityList outputQuantityList = 8;
+    optional string transformation_id = 9;
+	optional string biz_step = 10;
+	optional string disposition = 11;
+	optional string read_point = 12;
+	optional string biz_location = 13;
+	repeated BizTransaction biz_transactions = 14;
+	repeated SourceList source_list = 15;
+	repeated DestinationList destination_list = 16;
+
+}

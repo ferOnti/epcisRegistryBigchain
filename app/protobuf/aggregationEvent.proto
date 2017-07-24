@@ -7,7 +7,7 @@ message AggregationEvent {
     required string event_time  = 1; 
     optional string record_time = 2; 
     string event_time_zone_offset = 3  [default = "-04:00"]; 
-    optional string event_id = 4; 
+    optional BaseExtension baseExtension = 4; 
     required string parent_id = 5; 
     repeated EpcList child_epcs = 6; 
 	optional ActionEnum action = 7 [default = ADD];
