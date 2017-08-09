@@ -466,22 +466,58 @@ function createAsset(channel) {
 
 }
 
+function getSold() {
+  $.get("/api/sold", function(data, status){
+    var source   = $("#soldList-template").html();
+    var template = Handlebars.compile(source);
+    $('#tbody-sold').html(template({epcisList:data}))
+  });
+}
+
+function epcidNav(epcid) {
+  $('#sold-result').html(epcid)
+
+  var data = '{"epcid": "' + epcid + '"}'
+
+  $.ajax({
+    url: "/api/epcid/provenance",
+    method: "POST",
+    data: data,
+    contentType: "application/json",
+    processData: false,
+    dataType: "json",
+    success: function(data, status){
+      console.log(data)
+      console.log(JSON.stringify(data))
+      $('#sold-result').html(JSON.stringify(data, null, 2))
+    },
+    error: function(error, status){
+      console.log(error)
+      $('#sold-result').html(error.statusText)
+    }
+  });
+
+}
+
 window.onload = function() {
-  initDialogs()
+  //initDialogs()
   
   //highlight scripts init
   hljs.initHighlightingOnLoad();
 
-  reloadNodeInfo();
-  getStats();
-  getAssets();
+  //reloadNodeInfo();
+  //getStats();
+  //getAssets();
 
-  setInterval(getStats, 4000)
+  //getSold();
+  //setInterval(getStats, 4000)
 
-  BlCharts.init();
-  ChainWebSocket.initialize()
+  //BlCharts.init();
+  //ChainWebSocket.initialize()
 
-  $('.navbar-nav a[href="#tab_blocks"]').tab('show')
+  $('.navbar-nav a[href="#tab_visibility"]').tab('show')
+  //$('.navbar-nav a[href="#tab_navigator"]').tab('show')
+  //$('.navbar-nav a[href="#tab_blocks"]').tab('show')
   //$('.navbar-nav a[href="#tab_participants"]').tab('show')
 
 }

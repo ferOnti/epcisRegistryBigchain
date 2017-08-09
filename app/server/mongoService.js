@@ -5,6 +5,9 @@ var config = require('../../config.json');
 var mongoDB = null;
 var mongoClient = require('mongodb').MongoClient;
 
+//todo: remove it
+var mongoDBlocal = null;
+
 var sprintf = require('sprintf').sprintf;
 
 var connectMongoServer = function() {
@@ -12,12 +15,30 @@ var connectMongoServer = function() {
 	 	// Use connect method to connect to the Server
 		mongoClient.connect(config.mongodb.url, function(err, db) {
 		    if (err) {
+			    console.log("Error, connecting to server "+config.mongodb.url);
 		        console.log (err);
 		        reject(err)
 		        process.exit(0);
 		    }
 		    console.log("Connected correctly to server "+config.mongodb.url);
 		    mongoDB = db;
+		    resolve()
+		});
+	})
+}
+
+var connectMongoLocalServer = function() {
+	return new Promise( (resolve, reject) => {
+	 	// Use connect method to connect to the Server
+		mongoClient.connect("mongodb://localhost:27017/supplyChainNestle", function(err, db) {
+		    if (err) {
+			    console.log("Error, connecting to localhost server ");
+		        console.log (err);
+		        reject(err)
+		        process.exit(0);
+		    }
+		    console.log("Connected correctly to localhost server ");
+		    mongoDBlocal = db;
 		    resolve()
 		});
 	})
@@ -232,7 +253,6 @@ var getAssetsList = function(channel=null, skip=0) {
 		query = {"data.assetType" : {$ne:null}}
 		if (channel) {
 			query["data.channel"] = channelHash
-		console.log(query)
 		}
 		fields= {"_id":1, "id":1, "data.channel":1, "data.assetType": 1, "data.assetId":1 }
 	    collection.find(query, fields).limit(50).skip(skip).toArray(function(err, docs) {
@@ -290,6 +310,148 @@ var getBlockTimeList = function() {
 db.bigchain.aggregate(
 )
 
+}
+
+var getSoldList = function(skip=0) {
+    var collection = mongoDBlocal.collection('epcis_sold');
+
+	return new Promise((resolve, reject) => {
+		query = {}
+		//fields= {"_id":1, "id":1, "data.channel":1, "data.assetType": 1, "data.assetId":1 }
+		fields = {}
+	    collection.find(query, fields).limit(50).skip(skip).toArray(function(err, docs) {
+		   	if (err) {
+	   			console.error(err)
+	   			reject(err)
+		   	}
+		   	resolve(docs)
+		})
+	})
+}
+
+/*
+var getProvenance = function(epcid) {
+    var collection = mongoDBlocal.collection('epcis_events');
+
+	return new Promise((resolve, reject) => {
+		query = { $or: [
+			{"outputEPCList":  epcid}, 
+			{"epcList": epcid }, 
+			{"childEPCs": epcid } 
+		]}
+		//fields= {"_id":1, "id":1, "data.channel":1, "data.assetType": 1, "data.assetId":1 }
+		fields = {}
+	    collection.find(query, fields).limit(50).toArray(function(err, docs) {
+		   	if (err) {
+	   			console.error(err)
+	   			reject(err)
+		   	}
+
+		   	console.log(docs)
+		   	resolve(docs)
+		})
+	})
+}
+*/
+
+// process the events in order to find in the upstream direction
+// input: events found in simple query by epcList
+// output: simplified array with findings
+
+var provenance1 = function(epcid) {
+    var collection = mongoDBlocal.collection('epcis_events');
+	var provDocs = []
+	return new Promise((resolve, reject) => {
+		query = { $or: [
+			{"epcList": epcid }, 
+		]}
+		sort = {"eventTime" : -1}
+	    collection.find(query).sort(sort).limit(50).toArray(function(err, docs) {
+		   	if (err) {
+	   			console.error(err)
+	   			reject(err)
+		   	}
+
+			for (i in docs) {
+				switch (docs[i].eventType) {
+					case "object" :
+						prov = {}
+						prov.eventId   = docs[i].eventId
+						prov.eventTime = docs[i].eventTime
+						prov.bizStep   = docs[i].bizStep
+						if (docs[i].bizStep == "urn:epcglobal:cbv:bizstep:retail_selling") {
+
+						} else {
+						prov.disposition   = docs[i].disposition
+						prov.action   = docs[i].action
+						}
+						provDocs.push(prov)
+						break
+					default:
+						provDocs.push(docs[i])
+
+				}
+			}
+		   	console.log(provDocs)
+		   	resolve(provDocs)
+		})
+	})
+	return provDocs;
+}
+
+var provenance2 = function(epcid, provDocs) {
+    var collection = mongoDBlocal.collection('epcis_events');
+    if (typeof provDocs == "undefined") {
+    	provDocs = []
+    }
+
+	return new Promise((resolve, reject) => {
+		query = { $or: [
+			{"childEPCs": epcid }, 
+		]}
+		sort = {"eventTime" : -1}
+	    collection.find(query).sort(sort).limit(50).toArray(function(err, docs) {
+		   	if (err) {
+	   			console.error(err)
+	   			reject(err)
+		   	}
+
+			for (i in docs) {
+				switch (docs[i].eventType) {
+					case "aggregation" :
+						prov = {}
+						prov.eventId   = docs[i].eventId
+						prov.eventTime = docs[i].eventTime
+						prov.parentID  = docs[i].parentID
+						prov.action  = docs[i].action
+						prov.bizStep   = docs[i].bizStep
+						//if (docs[i].bizStep == "urn:epcglobal:cbv:bizstep:retail_selling") {
+//
+						//} else {
+						//prov.disposition   = docs[i].disposition
+						//prov.action   = docs[i].action
+						//}
+						provDocs.push(prov)
+						break
+					default:
+						provDocs.push(docs[i])
+
+				}
+			}
+		   	console.log(provDocs)
+		   	resolve(provDocs)
+		})
+	})
+	return provDocs;
+}
+
+var getProvenance = function(epcid) {
+
+	return new Promise((resolve, reject) => {
+		provenance1(epcid)
+			.then((provDocs) => {return provenance2(epcid, provDocs)} )
+			.then((provDocs) => {resolve(provDocs)} )
+	})
 }
 
 var secretTest = function() {
@@ -423,10 +585,13 @@ var secretTest = function() {
 
 module.exports = {
     connect:       connectMongoServer,
+    connectLocal:  connectMongoLocalServer,
     getBlock:      getBlock,
     getStats:      getStats,
     getAsset:      getAsset,
     getAssetsList: getAssetsList,
     getBlockTimeList: getBlockTimeList,
+    getSoldList:   getSoldList,
+    getProvenance: getProvenance,
     secretTest:    secretTest
 }

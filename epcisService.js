@@ -4,7 +4,6 @@ var config = require('./config.bulk.json');
 
 
 const API_PATH =  config.server
-//const API_PATH =   'http://13.82.50.105:9984/api/v1/'
 
 const alice = new BigchainDB.Ed25519Keypair()
 

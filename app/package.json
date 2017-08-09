@@ -5,7 +5,7 @@
   "author": "Fernando Ontiveros <feronti@gmail.com>",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js 2>/dev/null"
+    "start": "node server.js "
   },
   "dependencies": {
     "bigchaindb-driver": "^0.3.0",

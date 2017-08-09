@@ -159,6 +159,32 @@ function init(webPort, websocketPort) {
 
     });
 
+    app.get('/api/sold', function (req, res) {
+        var skip = req.query.skip
+
+        var mongoService = require("./mongoService");
+        mongoService.getSoldList(skip)
+            .then((data) => { res.json(data)} )
+            .catch((message) => {
+                console.error(message)
+                res.status(400).json({error:true, message: message})
+            })
+
+    });
+
+    app.post('/api/epcid/provenance', function (req, res) {
+        var epcid = req.body.epcid
+
+        var epcisService = require("./epcisService");
+        epcisService.getProvenance(epcid)
+            .then((data) => { res.json(data)} )
+            .catch((message) => {
+                console.error(message)
+                res.status(400).json({error:true, message: message})
+            })
+
+    });
+
     app.post('/api/stress/start', function (req, res) {
         var wsService = require("./wsService"); //todo: move stress test to another service?
         var stressTotal   = req.body.stressTotal;
@@ -383,6 +409,7 @@ function init(webPort, websocketPort) {
         console.log("Live at Port " + webPort);
     })
 
+    /*
     //websocket server
     //todo: move to wsService 
     //const server = http.createServer(app);
@@ -425,7 +452,7 @@ function init(webPort, websocketPort) {
     server.listen(websocketPort, function listening() {
         console.log('websocket open on %d', server.address().port);
     });
-
+*/
 }
 
 var wsDispatch = function(wss, ws, req, command) {

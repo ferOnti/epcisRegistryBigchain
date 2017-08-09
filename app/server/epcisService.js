@@ -377,6 +377,26 @@ var postAsset = function(name, assetData) {
 
 }
 
+var getProvenance = function (epcid) {
+
+    var mongoService = require("./mongoService")
+
+	return new Promise( (resolve, reject) => {
+		mongoService.getProvenance(epcid)
+			.then((doc) => {
+				if (doc == null) {
+					reject("epcid with id " + id + " does not exists")
+				} else {
+					resolve(doc)
+				}
+			})
+			.catch((err)=>{reject(err)})
+	})
+
+}
+
+
+
 module.exports.getAsset           = getAsset
 module.exports.getEpcisAsset      = getEpcisAsset
 module.exports.processObjectEvent = processObjectEvent
@@ -385,6 +405,7 @@ module.exports.postAsset          = postAsset
 module.exports.postEpcisEvent     = postEpcisEvent
 module.exports.processLine        = processLine
 module.exports.getTransaction     = getTransaction
+module.exports.getProvenance      = getProvenance
 
 
 

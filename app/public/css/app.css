@@ -39,3 +39,129 @@ div.disabled, .disabled button, .disabled .panel-heading, .disabled div {
     visibility:hidden;
 }
 
+
+/* visibility matrix */
+.wrapper{
+    border: #d8d8ef solid 1px;
+    width:150%;
+    min-width:315px;
+    height:23.8em;
+    margin-bottom: 10px;
+}
+.typeEventColumn{
+    float:left;
+    display:inline-block;
+    width:6em;
+    background:#f8f8ff;
+    margin:0px ;
+    border: #d8d8ef solid 1px;
+}
+
+
+.typeEventCell{
+    border-top: #678ee8 dashed 1px;
+    background: #bad7f8;
+    margin:0px ;
+    padding: 2.2em 1.5em;
+    height: 5.5em;
+}
+
+.typeEventCellTop{
+    background: #bad7f8;
+    margin:0px ;
+    padding: 30px 15px;
+    height: 7em;
+}
+
+.eventColumn{
+    float:left;
+
+    font-size: 1em; /* change icon size */
+    display: block;
+    width: 5em;
+    height: 23.5em;
+    background-color: #fff;
+}
+
+.eventColumnVertical {
+    border-left: #678ee8 dashed 1px;
+}
+
+.eventColumn *
+{
+  display: block;
+  width: 100%;
+  font-size: 1em;
+  font-weight: bold;
+  font-style: normal;
+  text-align: center;
+}
+
+.eventColumn em
+{
+  width: 100%;
+  font-size: 0.8em;
+  font-weight: 500;
+  bottom: 0.3em;
+  color: #e3881b;
+}
+.eventColumn strong
+{
+  font-weight: 400;
+  font-size: 0.75em;
+  bottom: 0.3em;
+  color: #8a3a1b;
+}
+
+.eventColumn span
+{
+  display: block;
+  text-align: left;
+  width: 4em;
+  font-weight: 400;
+  font-size: 0.9em;
+  color: #000;
+
+  white-space: nowrap;
+  position: relative;
+  z-index: 1;
+  transform-origin: right bottom;
+  transform: rotate(-80deg);
+  margin-top: 3.0em;
+
+}
+.numberCircle {
+  display: block;
+  text-align: center;
+  font: 1.1em Arial, sans-serif;
+
+  border-radius: 50%;
+  border: 2px solid #df535a;
+
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+
+  background: #fff;
+  color: #df535a;
+
+  position: relative;
+  margin-left: 1.3em;
+  margin-top: 3.5em;
+
+}
+
+.offset2 {
+  margin-top: 14em;
+
+}
+
+.offset1 {
+  margin-top: 8.9em;
+
+}
+
+.offset0 {
+  margin-top: 3.8em;
+
+}
